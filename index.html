@@ -119,10 +119,10 @@ const ICONS = {
 
 const SECTIONS = [
   { title:'Tools', layout:'tiles', items:[
-    { name:'Payments Pricing Calculator', desc:'Estimate MRR, take rate & net margin for a merchant deal.', url:'https://quiltpaymentscalculator.netlify.app/', icon:'calculator', status:'live' },
+    { name:'Payments Pricing Calculator', desc:'Estimate MRR, take rate & net margin for a merchant deal.', url:'https://quiltpaymentscalculator.netlify.app/', icon:'calculator', status:'live', published:'2026-07-20' },
   ]},
   { title:'Dashboards', layout:'tiles', items:[
-    { name:'Salesforce Projects Dashboard', desc:'Sprint progress, team capacity & project states.', url:'https://cx.quiltteam.com/sfdc-shortcut', icon:'chart', status:'live' },
+    { name:'Salesforce Projects Dashboard', desc:'Sprint progress, team capacity & project states.', url:'https://cx.quiltteam.com/sfdc-shortcut', icon:'chart', status:'live', published:'2026-04-15' },
   ]},
   { title:'Playbooks & Docs', layout:'list', items:[
     { name:'Pricing Guidelines', desc:'Rate cards, discount bands & approval thresholds.', url:'', icon:'tag' },
@@ -137,9 +137,11 @@ const hostOf = url => { try{ return new URL(url).hostname.replace(/^www\./,''); 
 const svg = n => '<svg viewBox="0 0 24 24" fill="none">'+(ICONS[n]||ICONS.doc)+'</svg>';
 const chipFor = it => it.status==='live' ? '<span class="chip live">Live</span>' : (it.url ? '' : '<span class="chip soon">Link pending</span>');
 
-function tileHTML(it){
+function fmtDate(iso){ try{ return new Date(iso+'T00:00:00').toLocaleString('en-US',{month:'short',year:'numeric'}); }catch{ return ''; } }
+function tileHTML(it,showDate){
+  const dateLine=(showDate&&it.published)?' · Added '+fmtDate(it.published):'';
   const inner='<div class="ic">'+svg(it.icon)+'</div>'+
-    '<div class="t"><div class="name">'+it.name+' '+chipFor(it)+'</div><div class="desc">'+it.desc+'</div></div>';
+    '<div class="t"><div class="name">'+it.name+' '+chipFor(it)+'</div><div class="desc">'+it.desc+dateLine+'</div></div>';
   return it.url ? '<a class="tile" href="'+it.url+'" target="_blank" rel="noopener"><span class="go">↗</span>'+inner+'</a>'
                 : '<div class="tile pending">'+inner+'</div>';
 }
@@ -152,46 +154,60 @@ function rowHTML(it){
                 : '<div class="row pending">'+inner+'</div>';
 }
 
-function render(q){
-  q=(q||'').trim().toLowerCase();
-  const root=document.getElementById('sections'); root.innerHTML=''; let shown=0;
-  SECTIONS.forEach(sec=>{
-    const items=sec.items.filter(it=> !q || (it.name+' '+it.desc).toLowerCase().includes(q));
-    if(!items.length) return; shown+=items.length;
-    const wp=document.createElement('section'); wp.className='webpart'; wp.id=slug(sec.title);
-    let body;
-    if(sec.layout==='list'){
-      body='<div class="doclist"><div class="hrow"><span></span><span>Name</span><span>Source</span></div>'+items.map(rowHTML).join('')+'</div>';
-    } else {
-      body='<div class="tiles">'+items.map(tileHTML).join('')+'</div>';
+let activeSection=null, query='';
+function webpartHTML(title,layout,items,id,showDate){
+  let body;
+  if(layout==='list'){
+    body='<div class="doclist"><div class="hrow"><span></span><span>Name</span><span>Source</span></div>'+items.map(rowHTML).join('')+'</div>';
+  } else {
+    body='<div class="tiles">'+items.map(it=>tileHTML(it,showDate)).join('')+'</div>';
+  }
+  return '<section class="webpart" id="'+id+'"><div class="wp-head"><h2>'+title+'</h2>'+
+         '<span class="n">'+items.length+' item'+(items.length!==1?'s':'')+'</span></div>'+body+'</section>';
+}
+function render(){
+  const q=query.trim().toLowerCase();
+  const match=it=> !q || (it.name+' '+it.desc).toLowerCase().includes(q);
+  let html='', shown=0;
+  if(activeSection===null){
+    if(q){ // Home + search → matching results across every section
+      SECTIONS.forEach(sec=>{ const items=sec.items.filter(match);
+        if(items.length){ shown+=items.length; html+=webpartHTML(sec.title,sec.layout,items,slug(sec.title)); } });
+    } else { // Home default → recently published, newest first
+      const recent=SECTIONS.flatMap(s=>s.items.filter(i=>i.published))
+                   .sort((a,b)=>String(b.published).localeCompare(String(a.published)));
+      if(recent.length){ shown=recent.length; html+=webpartHTML('Recently published','tiles',recent,'home',true); }
     }
-    wp.innerHTML='<div class="wp-head"><h2>'+sec.title+'</h2><span class="n">'+items.length+' item'+(items.length!==1?'s':'')+'</span></div>'+body;
-    root.appendChild(wp);
-  });
-  if(!shown) root.innerHTML='<div class="empty">No results for “'+q+'”.</div>';
+  } else { // a section tab → just that section
+    const sec=SECTIONS.find(s=>s.title===activeSection);
+    if(sec){ const items=sec.items.filter(match);
+      if(items.length){ shown=items.length; html+=webpartHTML(sec.title,sec.layout,items,slug(sec.title)); } }
+  }
+  document.getElementById('sections').innerHTML = shown ? html
+    : '<div class="empty">No results'+(q?' for “'+query.trim()+'”':'')+'.</div>';
   document.getElementById('count').textContent = SECTIONS.reduce((n,s)=>n+s.items.length,0)+' resources';
 }
 
-// build top nav from sections
+// build top nav from sections (Home + one tab per section)
 (function buildNav(){
   const nav=document.getElementById('nav');
-  nav.innerHTML='<a class="active" data-to="">Home</a>'+SECTIONS.map(s=>'<a data-to="'+slug(s.title)+'">'+s.title+'</a>').join('');
+  nav.innerHTML='<a class="active">Home</a>'+SECTIONS.map(s=>'<a data-title="'+s.title+'">'+s.title+'</a>').join('');
   nav.addEventListener('click',e=>{
     const a=e.target.closest('a'); if(!a)return;
     [...nav.children].forEach(x=>x.classList.toggle('active',x===a));
-    const id=a.dataset.to;
-    if(!id){ window.scrollTo({top:0,behavior:'smooth'}); }
-    else { const el=document.getElementById(id); if(el) window.scrollTo({top:el.offsetTop-60,behavior:'smooth'}); }
+    activeSection=a.dataset.title||null;
+    window.scrollTo({top:0});
+    render();
   });
 })();
 
-document.getElementById('search').addEventListener('input',e=>render(e.target.value));
+document.getElementById('search').addEventListener('input',e=>{ query=e.target.value; render(); });
 document.getElementById('themeBtn').addEventListener('click',()=>{
   const dark=document.documentElement.getAttribute('data-theme')==='dark';
   document.documentElement.setAttribute('data-theme',dark?'light':'dark');
   document.getElementById('themeBtn').innerHTML = dark?'🌙 <span>Dark</span>':'☀️ <span>Light</span>';
 });
-render('');
+render();
 </script>
 </body>
 </html>
