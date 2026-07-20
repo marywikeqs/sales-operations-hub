@@ -3,93 +3,109 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Quilt · Sales Operations Hub</title>
+<title>Sales Operations Hub</title>
 <style>
 :root{
-  --bg:#f4f5fb; --bg2:#eceefb; --panel:#ffffff; --ink:#161829; --muted:#6b6f8a;
-  --line:#e9eaf5; --brand:#5b4be6; --brand-2:#8b5cf6; --good:#0d9a6a; --chip:#eef0fb;
-  --card-shadow:0 1px 2px rgba(20,22,50,.05),0 10px 30px rgba(20,22,50,.07);
+  --bg:#f3f2f1; --surface:#ffffff; --ink:#323130; --muted:#605e5c;
+  --line:#e1dfdd; --line-strong:#c8c6c4; --accent:#5b4be6; --accent-soft:#eceafb;
+  --hover:#f5f4f8; --good:#0b6a0b; --good-soft:#dff6dd;
 }
 html[data-theme="dark"]{
-  --bg:#0b0d1a; --bg2:#111427; --panel:#161a2e; --ink:#eef0fb; --muted:#9aa0c4;
-  --line:#262b45; --brand:#8b7bff; --brand-2:#a78bfa; --good:#34d399; --chip:#20253d;
-  --card-shadow:0 1px 2px rgba(0,0,0,.4),0 14px 40px rgba(0,0,0,.45);
+  --bg:#1b1a19; --surface:#252423; --ink:#f3f2f1; --muted:#a19f9d;
+  --line:#3b3a39; --line-strong:#484644; --accent:#a08bff; --accent-soft:#2c2740;
+  --hover:#2d2b2a; --good:#5ec75e; --good-soft:#1e3320;
 }
 *{box-sizing:border-box}
-body{margin:0;color:var(--ink);-webkit-font-smoothing:antialiased;
-  font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,Helvetica,Arial,sans-serif;
-  background:
-    radial-gradient(900px 500px at 12% -8%, color-mix(in srgb,var(--brand) 16%,transparent), transparent 60%),
-    radial-gradient(800px 500px at 108% 4%, color-mix(in srgb,var(--brand-2) 15%,transparent), transparent 55%),
-    linear-gradient(180deg,var(--bg2),var(--bg));
-  background-attachment:fixed;min-height:100vh}
-.wrap{max-width:1180px;margin:0 auto;padding:30px 22px 80px}
-/* header */
-.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:22px}
-.brandline{display:flex;align-items:center;gap:13px}
-.logo{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--brand),var(--brand-2));
-  display:grid;place-items:center;box-shadow:0 6px 16px color-mix(in srgb,var(--brand) 38%,transparent)}
-.logo svg{width:24px;height:24px}
-h1{margin:0;font-size:23px;font-weight:800;letter-spacing:-.5px}
-.brandline p{margin:2px 0 0;font-size:13px;color:var(--muted);font-weight:500}
-.theme{border:1px solid var(--line);background:var(--panel);color:var(--muted);border-radius:10px;
-  padding:9px 13px;cursor:pointer;font-size:13px;display:flex;gap:7px;align-items:center;transition:.15s}
-.theme:hover{color:var(--ink)}
-.search{position:relative;margin-bottom:30px}
-.search input{width:100%;padding:13px 15px 13px 42px;border:1px solid var(--line);border-radius:13px;font-size:14.5px;
-  font-family:inherit;background:var(--panel);color:var(--ink);box-shadow:var(--card-shadow)}
-.search input::placeholder{color:var(--muted)}
-.search input:focus{outline:2px solid var(--brand);outline-offset:1px;border-color:var(--brand)}
-.search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--muted)}
-/* sections */
-.section{margin-bottom:34px}
-.section h2{font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
-  margin:0 0 15px;font-weight:800;display:flex;align-items:center;gap:9px}
-.section h2 .dot{width:9px;height:9px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2))}
-.section h2 .n{font-weight:700;color:var(--muted);opacity:.6;letter-spacing:0}
-.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:17px}
-.card{position:relative;display:flex;gap:15px;align-items:flex-start;background:var(--panel);
-  border:1px solid var(--line);border-radius:18px;padding:19px 20px;box-shadow:var(--card-shadow);
-  text-decoration:none;color:inherit;transition:transform .16s cubic-bezier(.2,.7,.3,1),box-shadow .16s,border-color .16s}
-a.card:hover{transform:translateY(-4px);border-color:color-mix(in srgb,var(--accent) 55%,var(--line));
-  box-shadow:0 4px 12px rgba(20,22,50,.06),0 18px 40px color-mix(in srgb,var(--accent) 26%,transparent)}
-.card .ic{flex:0 0 46px;width:46px;height:46px;border-radius:13px;display:grid;place-items:center;color:#fff;
-  background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 6px 16px color-mix(in srgb,var(--accent) 40%,transparent)}
-.card .ic svg{width:24px;height:24px}
-.card .body{min-width:0}
-.card .name{font-weight:750;font-size:15.5px;letter-spacing:-.1px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.card .desc{font-size:13.2px;color:var(--muted);margin-top:5px}
-.card .host{font-size:11.5px;color:var(--muted);margin-top:10px;font-weight:600;opacity:.85}
-.card .go{position:absolute;top:16px;right:16px;color:var(--accent);opacity:0;transform:translate(-4px,4px);
-  transition:.18s;font-size:15px}
-a.card:hover .go{opacity:1;transform:translate(0,0)}
-.chip{font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:3px 8px;border-radius:999px}
-.chip.live{background:color-mix(in srgb,var(--good) 16%,transparent);color:var(--good)}
-.chip.soon{background:var(--chip);color:var(--muted)}
-.card.pending{opacity:.7;cursor:default;box-shadow:none;background:transparent;border-style:dashed}
-.card.pending .ic{background:var(--chip);color:var(--muted);box-shadow:none}
-.empty{color:var(--muted);font-size:14px;padding:26px;text-align:center;border:1px dashed var(--line);border-radius:16px;background:var(--panel)}
-footer{margin-top:22px;color:var(--muted);font-size:12px;text-align:center}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:14px/1.5 "Segoe UI","Segoe UI Web (West European)",-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif}
+a{color:inherit}
+/* site header */
+.site-header{background:var(--surface);border-bottom:1px solid var(--line);padding:0 24px}
+.site-header .inner{max-width:1200px;margin:0 auto;height:52px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brandline{display:flex;align-items:center;gap:11px;min-width:0}
+.logo{width:30px;height:30px;border-radius:4px;background:linear-gradient(135deg,var(--accent),#8b5cf6);display:grid;place-items:center;flex:0 0 auto}
+.logo svg{width:18px;height:18px}
+.site-title{font-size:15px;font-weight:600;letter-spacing:-.1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.theme{border:1px solid var(--line-strong);background:var(--surface);color:var(--muted);border-radius:4px;
+  padding:6px 11px;cursor:pointer;font:inherit;font-size:12.5px;display:flex;gap:6px;align-items:center}
+.theme:hover{background:var(--hover);color:var(--ink)}
+/* command / nav bar */
+.navbar{background:var(--surface);border-bottom:1px solid var(--line);padding:0 24px;position:sticky;top:0;z-index:5}
+.navbar .inner{max-width:1200px;margin:0 auto;height:44px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.nav{display:flex;gap:2px;height:100%}
+.nav a{display:flex;align-items:center;padding:0 13px;height:100%;font-size:13.5px;font-weight:600;color:var(--ink);
+  text-decoration:none;border-bottom:2px solid transparent;cursor:pointer}
+.nav a:hover{background:var(--hover)}
+.nav a.active{border-bottom-color:var(--accent);color:var(--accent)}
+.search{position:relative;width:250px;max-width:38vw}
+.search input{width:100%;padding:7px 10px 7px 32px;border:1px solid var(--line-strong);border-radius:4px;
+  font:inherit;font-size:13px;background:var(--surface);color:var(--ink)}
+.search input:focus{outline:0;border-color:var(--accent)}
+.search svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--muted)}
+/* page */
+.page{max-width:1200px;margin:0 auto;padding:26px 24px 70px}
+.webpart{margin-bottom:30px}
+.wp-head{display:flex;align-items:baseline;gap:10px;margin:0 0 14px}
+.wp-head h2{font-size:18px;font-weight:600;margin:0;letter-spacing:-.2px}
+.wp-head .n{font-size:12.5px;color:var(--muted)}
+/* quick-link tiles */
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
+.tile{position:relative;display:flex;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--line);
+  border-radius:6px;padding:14px 15px;text-decoration:none;color:inherit;transition:background .1s,border-color .1s,box-shadow .1s}
+a.tile:hover{background:var(--hover);border-color:var(--line-strong);box-shadow:0 1.6px 3.6px rgba(0,0,0,.08),0 .3px .9px rgba(0,0,0,.06)}
+.tile .ic{flex:0 0 40px;width:40px;height:40px;border-radius:5px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent)}
+.tile .ic svg{width:22px;height:22px}
+.tile .t{min-width:0}
+.tile .t .name{font-size:14px;font-weight:600;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.tile .t .desc{font-size:12.5px;color:var(--muted);margin-top:2px}
+.tile.pending{border-style:dashed;background:transparent}
+.tile.pending .ic{background:var(--hover);color:var(--muted)}
+a.tile .go{position:absolute;right:12px;top:12px;color:var(--accent);opacity:0;transition:.12s;font-size:13px}
+a.tile:hover .go{opacity:1}
+/* document-library list */
+.doclist{background:var(--surface);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.doclist .hrow,.doclist .row{display:grid;grid-template-columns:34px 1fr auto;gap:12px;align-items:center;padding:0 16px}
+.doclist .hrow{height:38px;border-bottom:1px solid var(--line);font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+.doclist .row{min-height:48px;border-bottom:1px solid var(--line);text-decoration:none;color:inherit}
+.doclist .row:last-child{border-bottom:0}
+.doclist a.row:hover{background:var(--hover)}
+.doclist .fi{color:var(--accent);display:grid;place-items:center}
+.doclist .fi svg{width:20px;height:20px}
+.doclist .nm{display:flex;flex-direction:column;justify-content:center;min-width:0;padding:8px 0}
+.doclist .nm .name{font-size:13.5px;font-weight:600}
+.doclist .nm .desc{font-size:12px;color:var(--muted);margin-top:1px}
+.doclist .meta{font-size:12px;color:var(--muted)}
+.doclist .row.pending .fi{color:var(--muted)}
+.chip{font-size:10px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;padding:2px 7px;border-radius:3px}
+.chip.live{background:var(--good-soft);color:var(--good)}
+.chip.soon{background:var(--hover);color:var(--muted);border:1px solid var(--line)}
+.empty{color:var(--muted);font-size:13.5px;padding:24px;text-align:center;border:1px dashed var(--line-strong);border-radius:6px;background:var(--surface)}
+.foot{max-width:1200px;margin:0 auto;padding:0 24px 40px;color:var(--muted);font-size:12px}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="topbar">
+<header class="site-header">
+  <div class="inner">
     <div class="brandline">
-      <div class="logo"><svg viewBox="0 0 24 24" fill="none"><path d="M4 8h16M4 12h16M4 16h16" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/><circle cx="8" cy="8" r="1.6" fill="#fff"/><circle cx="15" cy="16" r="1.6" fill="#fff"/></svg></div>
-      <div><h1>Sales Operations Hub</h1><p>Quilt Software · tools, dashboards &amp; playbooks in one place</p></div>
+      <div class="logo"><svg viewBox="0 0 24 24" fill="none"><path d="M4 8h16M4 12h16M4 16h16" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><circle cx="8" cy="8" r="1.6" fill="#fff"/><circle cx="15" cy="16" r="1.6" fill="#fff"/></svg></div>
+      <div class="site-title">Sales Operations Hub</div>
     </div>
     <button class="theme" id="themeBtn">🌙 <span>Dark</span></button>
   </div>
-  <div class="search">
-    <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-    <input type="text" id="search" placeholder="Search tools, dashboards, docs…" autocomplete="off">
+</header>
+
+<nav class="navbar">
+  <div class="inner">
+    <div class="nav" id="nav"></div>
+    <div class="search">
+      <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <input type="text" id="search" placeholder="Search this hub" autocomplete="off">
+    </div>
   </div>
+</nav>
 
-  <div id="sections"></div>
-
-  <footer>Quilt Software · Sales Operations Hub — internal · <span id="count"></span></footer>
-</div>
+<main class="page" id="sections"></main>
+<div class="foot">Quilt Software · Sales Operations Hub — internal · <span id="count"></span></div>
 
 <script>
 const ICONS = {
@@ -101,17 +117,14 @@ const ICONS = {
   flag:'<path d="M5 21V4m0 0 6 2 8-2v11l-8 2-6-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>'
 };
 
-// section accent gradients (accent, accent2)
-const ACCENTS = [ ['#5b4be6','#8b5cf6'], ['#0ea5b7','#22c1d6'], ['#e08a1e','#f5b301'], ['#e0457b','#f472b6'] ];
-
 const SECTIONS = [
-  { title:'Tools', items:[
+  { title:'Tools', layout:'tiles', items:[
     { name:'Payments Pricing Calculator', desc:'Estimate MRR, take rate & net margin for a merchant deal.', url:'https://quiltpaymentscalculator.netlify.app/', icon:'calculator', status:'live' },
   ]},
-  { title:'Dashboards', items:[
+  { title:'Dashboards', layout:'tiles', items:[
     { name:'Salesforce Projects Dashboard', desc:'Sprint progress, team capacity & project states.', url:'https://cx.quiltteam.com/sfdc-shortcut', icon:'chart', status:'live' },
   ]},
-  { title:'Playbooks & Docs', items:[
+  { title:'Playbooks & Docs', layout:'list', items:[
     { name:'Pricing Guidelines', desc:'Rate cards, discount bands & approval thresholds.', url:'', icon:'tag' },
     { name:'Sales Process & Deal Stages', desc:'Stage definitions, exit criteria & handoffs.', url:'', icon:'flag' },
     { name:'Discounting & Approvals', desc:'Who can approve what, and how to request it.', url:'', icon:'doc' },
@@ -119,42 +132,58 @@ const SECTIONS = [
   ]},
 ];
 
-function hostOf(url){ try{ return new URL(url).hostname.replace(/^www\./,''); }catch{ return ''; } }
-function svg(name){ return '<svg viewBox="0 0 24 24" fill="none">'+(ICONS[name]||ICONS.doc)+'</svg>'; }
+const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+const hostOf = url => { try{ return new URL(url).hostname.replace(/^www\./,''); }catch{ return ''; } };
+const svg = n => '<svg viewBox="0 0 24 24" fill="none">'+(ICONS[n]||ICONS.doc)+'</svg>';
+const chipFor = it => it.status==='live' ? '<span class="chip live">Live</span>' : (it.url ? '' : '<span class="chip soon">Link pending</span>');
 
-function cardHTML(it){
-  const chip = it.status==='live' ? '<span class="chip live">Live</span>'
-             : it.url ? '' : '<span class="chip soon">Link pending</span>';
-  const inner =
-    '<div class="ic">'+svg(it.icon)+'</div>'+
-    '<div class="body"><div class="name">'+it.name+' '+chip+'</div>'+
-    '<div class="desc">'+it.desc+'</div>'+
-    (it.url ? '<div class="host">'+hostOf(it.url)+'</div>' : '<div class="host">Send me the link and I\'ll wire it up</div>')+
-    '</div>';
-  return it.url
-    ? '<a class="card" href="'+it.url+'" target="_blank" rel="noopener"><span class="go">↗</span>'+inner+'</a>'
-    : '<div class="card pending">'+inner+'</div>';
+function tileHTML(it){
+  const inner='<div class="ic">'+svg(it.icon)+'</div>'+
+    '<div class="t"><div class="name">'+it.name+' '+chipFor(it)+'</div><div class="desc">'+it.desc+'</div></div>';
+  return it.url ? '<a class="tile" href="'+it.url+'" target="_blank" rel="noopener"><span class="go">↗</span>'+inner+'</a>'
+                : '<div class="tile pending">'+inner+'</div>';
+}
+function rowHTML(it){
+  const meta = it.url ? hostOf(it.url) : chipFor(it);
+  const inner='<div class="fi">'+svg(it.icon)+'</div>'+
+    '<div class="nm"><div class="name">'+it.name+'</div><div class="desc">'+it.desc+'</div></div>'+
+    '<div class="meta">'+meta+'</div>';
+  return it.url ? '<a class="row" href="'+it.url+'" target="_blank" rel="noopener">'+inner+'</a>'
+                : '<div class="row pending">'+inner+'</div>';
 }
 
 function render(q){
   q=(q||'').trim().toLowerCase();
-  const root=document.getElementById('sections'); root.innerHTML='';
-  let shown=0;
-  SECTIONS.forEach((sec,i)=>{
+  const root=document.getElementById('sections'); root.innerHTML=''; let shown=0;
+  SECTIONS.forEach(sec=>{
     const items=sec.items.filter(it=> !q || (it.name+' '+it.desc).toLowerCase().includes(q));
-    if(!items.length) return;
-    shown+=items.length;
-    const acc=ACCENTS[i%ACCENTS.length];
-    const s=document.createElement('div'); s.className='section';
-    s.style.setProperty('--accent',acc[0]); s.style.setProperty('--accent2',acc[1]);
-    s.innerHTML='<h2><span class="dot"></span>'+sec.title+' <span class="n">'+items.length+'</span></h2>'+
-                '<div class="cards">'+items.map(cardHTML).join('')+'</div>';
-    root.appendChild(s);
+    if(!items.length) return; shown+=items.length;
+    const wp=document.createElement('section'); wp.className='webpart'; wp.id=slug(sec.title);
+    let body;
+    if(sec.layout==='list'){
+      body='<div class="doclist"><div class="hrow"><span></span><span>Name</span><span>Source</span></div>'+items.map(rowHTML).join('')+'</div>';
+    } else {
+      body='<div class="tiles">'+items.map(tileHTML).join('')+'</div>';
+    }
+    wp.innerHTML='<div class="wp-head"><h2>'+sec.title+'</h2><span class="n">'+items.length+' item'+(items.length!==1?'s':'')+'</span></div>'+body;
+    root.appendChild(wp);
   });
-  if(!shown){ root.innerHTML='<div class="empty">No matches for “'+q+'”.</div>'; }
-  const total=SECTIONS.reduce((n,s)=>n+s.items.length,0);
-  document.getElementById('count').textContent = total+' resources';
+  if(!shown) root.innerHTML='<div class="empty">No results for “'+q+'”.</div>';
+  document.getElementById('count').textContent = SECTIONS.reduce((n,s)=>n+s.items.length,0)+' resources';
 }
+
+// build top nav from sections
+(function buildNav(){
+  const nav=document.getElementById('nav');
+  nav.innerHTML='<a class="active" data-to="">Home</a>'+SECTIONS.map(s=>'<a data-to="'+slug(s.title)+'">'+s.title+'</a>').join('');
+  nav.addEventListener('click',e=>{
+    const a=e.target.closest('a'); if(!a)return;
+    [...nav.children].forEach(x=>x.classList.toggle('active',x===a));
+    const id=a.dataset.to;
+    if(!id){ window.scrollTo({top:0,behavior:'smooth'}); }
+    else { const el=document.getElementById(id); if(el) window.scrollTo({top:el.offsetTop-60,behavior:'smooth'}); }
+  });
+})();
 
 document.getElementById('search').addEventListener('input',e=>render(e.target.value));
 document.getElementById('themeBtn').addEventListener('click',()=>{
