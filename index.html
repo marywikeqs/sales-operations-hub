@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Quilt · Sales Operations Hub</title>
+<style>
+:root{
+  --bg:#f5f6fa; --panel:#ffffff; --panel-2:#fbfbfe; --ink:#1a1c2e; --muted:#6b6f8a;
+  --line:#e7e8f2; --brand:#5b4be6; --brand-2:#8b5cf6; --brand-ink:#3d2fb8;
+  --good:#0d9a6a; --chip:#eef0fb; --shadow:0 1px 2px rgba(20,22,50,.06),0 8px 24px rgba(20,22,50,.06);
+}
+html[data-theme="dark"]{
+  --bg:#0e1020; --panel:#171a2e; --panel-2:#1c2038; --ink:#eef0fb; --muted:#9aa0c4;
+  --line:#2a2f4d; --brand:#8b7bff; --brand-2:#a78bfa; --brand-ink:#c7bcff;
+  --good:#34d399; --chip:#232842; --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1160px;margin:0 auto;padding:28px 20px 72px}
+/* hero */
+.hero{background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;border-radius:20px;
+  padding:30px 32px;box-shadow:var(--shadow);position:relative;overflow:hidden;margin-bottom:26px}
+.hero::after{content:"";position:absolute;right:-60px;top:-60px;width:240px;height:240px;border-radius:50%;
+  background:rgba(255,255,255,.10)}
+.hero .top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;position:relative;z-index:1}
+.brandline{display:flex;align-items:center;gap:13px}
+.logo{width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.18);display:grid;place-items:center}
+.logo svg{width:26px;height:26px}
+.hero h1{margin:0;font-size:26px;letter-spacing:-.4px}
+.hero p{margin:4px 0 0;opacity:.9;font-size:14px}
+.theme{border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff;border-radius:9px;
+  padding:8px 12px;cursor:pointer;font-size:13px;display:flex;gap:7px;align-items:center}
+.search{margin-top:22px;position:relative;z-index:1;max-width:440px}
+.search input{width:100%;padding:12px 14px 12px 40px;border:0;border-radius:11px;font-size:14.5px;font-family:inherit;
+  background:rgba(255,255,255,.95);color:#1a1c2e}
+.search input:focus{outline:3px solid rgba(255,255,255,.5)}
+.search svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:17px;height:17px;opacity:.55}
+/* sections */
+.section{margin-bottom:30px}
+.section h2{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 14px;font-weight:700}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.card{display:flex;gap:14px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:16px;
+  padding:18px;box-shadow:var(--shadow);text-decoration:none;color:inherit;transition:transform .12s,box-shadow .12s,border-color .12s}
+a.card:hover{transform:translateY(-2px);border-color:var(--brand);box-shadow:0 6px 20px rgba(91,75,230,.18)}
+.card .ic{flex:0 0 44px;width:44px;height:44px;border-radius:12px;display:grid;place-items:center;
+  background:var(--chip);color:var(--brand)}
+.card .ic svg{width:23px;height:23px}
+.card .body{min-width:0}
+.card .name{font-weight:700;font-size:15.5px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card .desc{font-size:13px;color:var(--muted);margin-top:4px}
+.card .host{font-size:11.5px;color:var(--muted);margin-top:8px;display:flex;align-items:center;gap:5px;opacity:.8}
+.chip{font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;padding:2px 8px;border-radius:999px}
+.chip.live{background:rgba(13,154,106,.14);color:var(--good)}
+.chip.soon{background:var(--chip);color:var(--muted)}
+.card.pending{opacity:.72;cursor:default}
+.card.pending:hover{transform:none;border-color:var(--line);box-shadow:var(--shadow)}
+.card.pending .ic{color:var(--muted)}
+.empty{color:var(--muted);font-size:14px;padding:20px;text-align:center;border:1px dashed var(--line);border-radius:14px}
+footer{margin-top:20px;color:var(--muted);font-size:12px;text-align:center;line-height:1.7}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div class="top">
+      <div class="brandline">
+        <div class="logo"><svg viewBox="0 0 24 24" fill="none"><path d="M4 8h16M4 12h16M4 16h16" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/><circle cx="8" cy="8" r="1.6" fill="#fff"/><circle cx="15" cy="16" r="1.6" fill="#fff"/></svg></div>
+        <div><h1>Sales Operations Hub</h1><p>Quilt Software · tools, dashboards &amp; playbooks in one place</p></div>
+      </div>
+      <button class="theme" id="themeBtn">🌙 <span>Dark</span></button>
+    </div>
+    <div class="search">
+      <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <input type="text" id="search" placeholder="Search tools, dashboards, docs…" autocomplete="off">
+    </div>
+  </div>
+
+  <div id="sections"></div>
+
+  <footer>
+    Quilt Software · Sales Operations Hub — internal · <span id="count"></span>
+  </footer>
+</div>
+
+<script>
+// ── Hub content. Edit this list to add / change cards. url:'' shows a "Link pending" card. ──
+const ICONS = {
+  calculator:'<path d="M6 2h12a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.8"/><path d="M8 6h8M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14v4M8 18h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>',
+  chart:'<path d="M4 20V6M10 20V10M16 20V4M22 20H2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>',
+  doc:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M14 2v6h6M8 13h8M8 17h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>',
+  book:'<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M4 19a2 2 0 0 0 2 2h13" stroke="currentColor" stroke-width="1.8"/>',
+  tag:'<path d="M3 12V5a2 2 0 0 1 2-2h7l9 9-9 9z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/>',
+  flag:'<path d="M5 21V4m0 0 6 2 8-2v11l-8 2-6-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>'
+};
+
+const SECTIONS = [
+  { title:'Tools', items:[
+    { name:'Payments Pricing Calculator', desc:'Estimate MRR, take rate & net margin for a merchant deal.', url:'https://quiltpaymentscalculator.netlify.app/', icon:'calculator', status:'live' },
+  ]},
+  { title:'Dashboards', items:[
+    { name:'Salesforce Projects Dashboard', desc:'Sprint progress, team capacity & project states.', url:'https://cx.quiltteam.com/sfdc-shortcut', icon:'chart', status:'live' },
+  ]},
+  { title:'Playbooks & Docs', items:[
+    { name:'Pricing Guidelines', desc:'Rate cards, discount bands & approval thresholds.', url:'', icon:'tag' },
+    { name:'Sales Process & Deal Stages', desc:'Stage definitions, exit criteria & handoffs.', url:'', icon:'flag' },
+    { name:'Discounting & Approvals', desc:'Who can approve what, and how to request it.', url:'', icon:'doc' },
+    { name:'Onboarding & Ramp', desc:'New-hire ramp plan and enablement resources.', url:'', icon:'book' },
+  ]},
+];
+
+function hostOf(url){ try{ return new URL(url).hostname.replace(/^www\./,''); }catch{ return ''; } }
+function svg(name){ return '<svg viewBox="0 0 24 24" fill="none">'+(ICONS[name]||ICONS.doc)+'</svg>'; }
+
+function cardHTML(it){
+  const chip = it.status==='live' ? '<span class="chip live">Live</span>'
+             : it.url ? '' : '<span class="chip soon">Link pending</span>';
+  const inner =
+    '<div class="ic">'+svg(it.icon)+'</div>'+
+    '<div class="body"><div class="name">'+it.name+' '+chip+'</div>'+
+    '<div class="desc">'+it.desc+'</div>'+
+    (it.url ? '<div class="host">↗ '+hostOf(it.url)+'</div>' : '<div class="host">Send me the link and I\'ll wire it up</div>')+
+    '</div>';
+  return it.url
+    ? '<a class="card" href="'+it.url+'" target="_blank" rel="noopener">'+inner+'</a>'
+    : '<div class="card pending">'+inner+'</div>';
+}
+
+function render(q){
+  q=(q||'').trim().toLowerCase();
+  const root=document.getElementById('sections'); root.innerHTML='';
+  let shown=0;
+  SECTIONS.forEach(sec=>{
+    const items=sec.items.filter(it=> !q || (it.name+' '+it.desc).toLowerCase().includes(q));
+    if(!items.length) return;
+    shown+=items.length;
+    const s=document.createElement('div'); s.className='section';
+    s.innerHTML='<h2>'+sec.title+'</h2><div class="cards">'+items.map(cardHTML).join('')+'</div>';
+    root.appendChild(s);
+  });
+  if(!shown){ root.innerHTML='<div class="empty">No matches for “'+q+'”.</div>'; }
+  const total=SECTIONS.reduce((n,s)=>n+s.items.length,0);
+  document.getElementById('count').textContent = total+' resources';
+}
+
+document.getElementById('search').addEventListener('input',e=>render(e.target.value));
+document.getElementById('themeBtn').addEventListener('click',()=>{
+  const dark=document.documentElement.getAttribute('data-theme')==='dark';
+  document.documentElement.setAttribute('data-theme',dark?'light':'dark');
+  document.getElementById('themeBtn').innerHTML = dark?'🌙 <span>Dark</span>':'☀️ <span>Light</span>';
+});
+render('');
+</script>
+</body>
+</html>
