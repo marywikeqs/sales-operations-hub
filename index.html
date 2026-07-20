@@ -6,59 +6,76 @@
 <title>Quilt · Sales Operations Hub</title>
 <style>
 :root{
-  --bg:#f5f6fa; --panel:#ffffff; --panel-2:#fbfbfe; --ink:#1a1c2e; --muted:#6b6f8a;
-  --line:#e7e8f2; --brand:#5b4be6; --brand-2:#8b5cf6; --brand-ink:#3d2fb8;
-  --good:#0d9a6a; --chip:#eef0fb; --shadow:0 1px 2px rgba(20,22,50,.06),0 8px 24px rgba(20,22,50,.06);
+  --bg:#f4f5fb; --bg2:#eceefb; --panel:#ffffff; --ink:#161829; --muted:#6b6f8a;
+  --line:#e9eaf5; --brand:#5b4be6; --brand-2:#8b5cf6; --good:#0d9a6a; --chip:#eef0fb;
+  --card-shadow:0 1px 2px rgba(20,22,50,.05),0 10px 30px rgba(20,22,50,.07);
 }
 html[data-theme="dark"]{
-  --bg:#0e1020; --panel:#171a2e; --panel-2:#1c2038; --ink:#eef0fb; --muted:#9aa0c4;
-  --line:#2a2f4d; --brand:#8b7bff; --brand-2:#a78bfa; --brand-ink:#c7bcff;
-  --good:#34d399; --chip:#232842; --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.35);
+  --bg:#0b0d1a; --bg2:#111427; --panel:#161a2e; --ink:#eef0fb; --muted:#9aa0c4;
+  --line:#262b45; --brand:#8b7bff; --brand-2:#a78bfa; --good:#34d399; --chip:#20253d;
+  --card-shadow:0 1px 2px rgba(0,0,0,.4),0 14px 40px rgba(0,0,0,.45);
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);
-  font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
-.wrap{max-width:1160px;margin:0 auto;padding:28px 20px 72px}
+body{margin:0;color:var(--ink);-webkit-font-smoothing:antialiased;
+  font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,Helvetica,Arial,sans-serif;
+  background:
+    radial-gradient(900px 500px at 12% -8%, color-mix(in srgb,var(--brand) 16%,transparent), transparent 60%),
+    radial-gradient(800px 500px at 108% 4%, color-mix(in srgb,var(--brand-2) 15%,transparent), transparent 55%),
+    linear-gradient(180deg,var(--bg2),var(--bg));
+  background-attachment:fixed;min-height:100vh}
+.wrap{max-width:1180px;margin:0 auto;padding:30px 22px 80px}
 /* hero */
-.hero{background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;border-radius:20px;
-  padding:30px 32px;box-shadow:var(--shadow);position:relative;overflow:hidden;margin-bottom:26px}
-.hero::after{content:"";position:absolute;right:-60px;top:-60px;width:240px;height:240px;border-radius:50%;
-  background:rgba(255,255,255,.10)}
+.hero{position:relative;overflow:hidden;border-radius:24px;padding:34px 36px;margin-bottom:30px;color:#fff;
+  background:linear-gradient(120deg,#4b3ce0 0%,#6d4bf0 42%,#9b5cf6 100%);
+  box-shadow:0 20px 50px rgba(80,60,220,.35)}
+.hero::before,.hero::after{content:"";position:absolute;border-radius:50%;filter:blur(2px)}
+.hero::before{width:320px;height:320px;right:-70px;top:-120px;background:radial-gradient(circle,rgba(255,255,255,.22),transparent 70%)}
+.hero::after{width:200px;height:200px;left:34%;bottom:-120px;background:radial-gradient(circle,rgba(255,255,255,.14),transparent 70%)}
 .hero .top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;position:relative;z-index:1}
-.brandline{display:flex;align-items:center;gap:13px}
-.logo{width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.18);display:grid;place-items:center}
-.logo svg{width:26px;height:26px}
-.hero h1{margin:0;font-size:26px;letter-spacing:-.4px}
-.hero p{margin:4px 0 0;opacity:.9;font-size:14px}
-.theme{border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff;border-radius:9px;
-  padding:8px 12px;cursor:pointer;font-size:13px;display:flex;gap:7px;align-items:center}
-.search{margin-top:22px;position:relative;z-index:1;max-width:440px}
-.search input{width:100%;padding:12px 14px 12px 40px;border:0;border-radius:11px;font-size:14.5px;font-family:inherit;
-  background:rgba(255,255,255,.95);color:#1a1c2e}
-.search input:focus{outline:3px solid rgba(255,255,255,.5)}
-.search svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:17px;height:17px;opacity:.55}
+.brandline{display:flex;align-items:center;gap:14px}
+.logo{width:48px;height:48px;border-radius:14px;background:rgba(255,255,255,.16);backdrop-filter:blur(6px);
+  display:grid;place-items:center;box-shadow:inset 0 0 0 1px rgba(255,255,255,.25)}
+.logo svg{width:28px;height:28px}
+.hero h1{margin:0;font-size:29px;font-weight:800;letter-spacing:-.6px}
+.hero p{margin:5px 0 0;opacity:.92;font-size:14.5px;font-weight:500}
+.theme{border:1px solid rgba(255,255,255,.32);background:rgba(255,255,255,.14);color:#fff;border-radius:10px;
+  padding:9px 13px;cursor:pointer;font-size:13px;display:flex;gap:7px;align-items:center;backdrop-filter:blur(6px);transition:.15s}
+.theme:hover{background:rgba(255,255,255,.24)}
+.search{margin-top:24px;position:relative;z-index:1;max-width:460px}
+.search input{width:100%;padding:13px 15px 13px 42px;border:0;border-radius:13px;font-size:14.5px;font-family:inherit;
+  background:rgba(255,255,255,.96);color:#161829;box-shadow:0 6px 18px rgba(30,20,80,.18)}
+.search input::placeholder{color:#8b8fac}
+.search input:focus{outline:3px solid rgba(255,255,255,.55)}
+.search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:#6b6f8a}
 /* sections */
-.section{margin-bottom:30px}
-.section h2{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 14px;font-weight:700}
-.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
-.card{display:flex;gap:14px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:16px;
-  padding:18px;box-shadow:var(--shadow);text-decoration:none;color:inherit;transition:transform .12s,box-shadow .12s,border-color .12s}
-a.card:hover{transform:translateY(-2px);border-color:var(--brand);box-shadow:0 6px 20px rgba(91,75,230,.18)}
-.card .ic{flex:0 0 44px;width:44px;height:44px;border-radius:12px;display:grid;place-items:center;
-  background:var(--chip);color:var(--brand)}
-.card .ic svg{width:23px;height:23px}
+.section{margin-bottom:34px}
+.section h2{font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+  margin:0 0 15px;font-weight:800;display:flex;align-items:center;gap:9px}
+.section h2 .dot{width:9px;height:9px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2))}
+.section h2 .n{font-weight:700;color:var(--muted);opacity:.6;letter-spacing:0}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:17px}
+.card{position:relative;display:flex;gap:15px;align-items:flex-start;background:var(--panel);
+  border:1px solid var(--line);border-radius:18px;padding:19px 20px;box-shadow:var(--card-shadow);
+  text-decoration:none;color:inherit;transition:transform .16s cubic-bezier(.2,.7,.3,1),box-shadow .16s,border-color .16s}
+a.card:hover{transform:translateY(-4px);border-color:color-mix(in srgb,var(--accent) 55%,var(--line));
+  box-shadow:0 4px 12px rgba(20,22,50,.06),0 18px 40px color-mix(in srgb,var(--accent) 26%,transparent)}
+.card .ic{flex:0 0 46px;width:46px;height:46px;border-radius:13px;display:grid;place-items:center;color:#fff;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 6px 16px color-mix(in srgb,var(--accent) 40%,transparent)}
+.card .ic svg{width:24px;height:24px}
 .card .body{min-width:0}
-.card .name{font-weight:700;font-size:15.5px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.card .desc{font-size:13px;color:var(--muted);margin-top:4px}
-.card .host{font-size:11.5px;color:var(--muted);margin-top:8px;display:flex;align-items:center;gap:5px;opacity:.8}
-.chip{font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;padding:2px 8px;border-radius:999px}
-.chip.live{background:rgba(13,154,106,.14);color:var(--good)}
+.card .name{font-weight:750;font-size:15.5px;letter-spacing:-.1px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card .desc{font-size:13.2px;color:var(--muted);margin-top:5px}
+.card .host{font-size:11.5px;color:var(--muted);margin-top:10px;font-weight:600;opacity:.85}
+.card .go{position:absolute;top:16px;right:16px;color:var(--accent);opacity:0;transform:translate(-4px,4px);
+  transition:.18s;font-size:15px}
+a.card:hover .go{opacity:1;transform:translate(0,0)}
+.chip{font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:3px 8px;border-radius:999px}
+.chip.live{background:color-mix(in srgb,var(--good) 16%,transparent);color:var(--good)}
 .chip.soon{background:var(--chip);color:var(--muted)}
-.card.pending{opacity:.72;cursor:default}
-.card.pending:hover{transform:none;border-color:var(--line);box-shadow:var(--shadow)}
-.card.pending .ic{color:var(--muted)}
-.empty{color:var(--muted);font-size:14px;padding:20px;text-align:center;border:1px dashed var(--line);border-radius:14px}
-footer{margin-top:20px;color:var(--muted);font-size:12px;text-align:center;line-height:1.7}
+.card.pending{opacity:.7;cursor:default;box-shadow:none;background:transparent;border-style:dashed}
+.card.pending .ic{background:var(--chip);color:var(--muted);box-shadow:none}
+.empty{color:var(--muted);font-size:14px;padding:26px;text-align:center;border:1px dashed var(--line);border-radius:16px;background:var(--panel)}
+footer{margin-top:22px;color:var(--muted);font-size:12px;text-align:center}
 </style>
 </head>
 <body>
@@ -79,13 +96,10 @@ footer{margin-top:20px;color:var(--muted);font-size:12px;text-align:center;line-
 
   <div id="sections"></div>
 
-  <footer>
-    Quilt Software · Sales Operations Hub — internal · <span id="count"></span>
-  </footer>
+  <footer>Quilt Software · Sales Operations Hub — internal · <span id="count"></span></footer>
 </div>
 
 <script>
-// ── Hub content. Edit this list to add / change cards. url:'' shows a "Link pending" card. ──
 const ICONS = {
   calculator:'<path d="M6 2h12a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.8"/><path d="M8 6h8M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14v4M8 18h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>',
   chart:'<path d="M4 20V6M10 20V10M16 20V4M22 20H2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>',
@@ -94,6 +108,9 @@ const ICONS = {
   tag:'<path d="M3 12V5a2 2 0 0 1 2-2h7l9 9-9 9z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/>',
   flag:'<path d="M5 21V4m0 0 6 2 8-2v11l-8 2-6-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>'
 };
+
+// section accent gradients (accent, accent2)
+const ACCENTS = [ ['#5b4be6','#8b5cf6'], ['#0ea5b7','#22c1d6'], ['#e08a1e','#f5b301'], ['#e0457b','#f472b6'] ];
 
 const SECTIONS = [
   { title:'Tools', items:[
@@ -120,10 +137,10 @@ function cardHTML(it){
     '<div class="ic">'+svg(it.icon)+'</div>'+
     '<div class="body"><div class="name">'+it.name+' '+chip+'</div>'+
     '<div class="desc">'+it.desc+'</div>'+
-    (it.url ? '<div class="host">↗ '+hostOf(it.url)+'</div>' : '<div class="host">Send me the link and I\'ll wire it up</div>')+
+    (it.url ? '<div class="host">'+hostOf(it.url)+'</div>' : '<div class="host">Send me the link and I\'ll wire it up</div>')+
     '</div>';
   return it.url
-    ? '<a class="card" href="'+it.url+'" target="_blank" rel="noopener">'+inner+'</a>'
+    ? '<a class="card" href="'+it.url+'" target="_blank" rel="noopener"><span class="go">↗</span>'+inner+'</a>'
     : '<div class="card pending">'+inner+'</div>';
 }
 
@@ -131,12 +148,15 @@ function render(q){
   q=(q||'').trim().toLowerCase();
   const root=document.getElementById('sections'); root.innerHTML='';
   let shown=0;
-  SECTIONS.forEach(sec=>{
+  SECTIONS.forEach((sec,i)=>{
     const items=sec.items.filter(it=> !q || (it.name+' '+it.desc).toLowerCase().includes(q));
     if(!items.length) return;
     shown+=items.length;
+    const acc=ACCENTS[i%ACCENTS.length];
     const s=document.createElement('div'); s.className='section';
-    s.innerHTML='<h2>'+sec.title+'</h2><div class="cards">'+items.map(cardHTML).join('')+'</div>';
+    s.style.setProperty('--accent',acc[0]); s.style.setProperty('--accent2',acc[1]);
+    s.innerHTML='<h2><span class="dot"></span>'+sec.title+' <span class="n">'+items.length+'</span></h2>'+
+                '<div class="cards">'+items.map(cardHTML).join('')+'</div>';
     root.appendChild(s);
   });
   if(!shown){ root.innerHTML='<div class="empty">No matches for “'+q+'”.</div>'; }
