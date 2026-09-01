@@ -236,8 +236,11 @@ const ICONS = {
 };
 
 const SECTIONS = [
+  /* Tools is intentionally empty. The Payments Pricing Calculator was pulled
+   * 2026-09-01 — it moved off Netlify and is being rebuilt — and the section is
+   * kept so the tab and its place in the nav survive until there is something
+   * to put back. */
   { title:'Tools', layout:'tiles', items:[
-    { name:'Payments Pricing Calculator', desc:'Estimate MRR, take rate & net margin for a merchant deal.', url:'https://quiltpaymentscalculator.netlify.app/', icon:'calculator', status:'live', published:'2026-07-20' },
   ]},
   { title:'Dashboards', layout:'tiles', items:[
     { name:'Salesforce Projects Dashboard', desc:'Sprint progress, team capacity & project states.', url:'https://cx.quiltteam.com/sfdc-shortcut', icon:'chart', status:'live', published:'2026-04-15' },
@@ -315,8 +318,14 @@ function render(){
     if(sec){ const items=sec.items.filter(match);
       if(items.length){ shown=items.length; html+=webpartHTML(sec.title,sec.layout,items,slug(sec.title)); } }
   }
+  /* An empty section is not a failed search, and saying "No results" for one
+   * reads like something broke. Three different situations, three messages. */
+  let blank;
+  if(q) blank='Nothing matches “'+esc(query.trim())+'”.';
+  else if(activeSection) blank='Nothing in '+esc(activeSection)+' yet.';
+  else blank='Nothing published yet.';
   document.getElementById('sections').innerHTML = shown ? html
-    : '<div class="empty">No results'+(q?' for “'+esc(query.trim())+'”':'')+'.</div>';
+    : '<div class="empty">'+blank+'</div>';
   document.getElementById('count').textContent = SECTIONS.reduce((n,s)=>n+s.items.length,0)+' resources';
 }
 
