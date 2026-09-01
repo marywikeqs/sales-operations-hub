@@ -3,84 +3,199 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="color-scheme" content="light dark"/>
 <title>Sales Operations Hub</title>
 <style>
+/* ------------------------------------------------------------------ *
+ * Sales Operations Hub
+ *
+ * Content lives in the SECTIONS array near the bottom — add or edit a
+ * card there and nothing else needs touching. url:'' renders a muted
+ * "Link pending" item that is not clickable.
+ *
+ * Look: depth and spacing rather than outlines. Earlier versions drew a
+ * 1px border around every element on a flat grey field, which is why it
+ * read as boxy; surfaces now separate by elevation and tint, corners are
+ * softer, and the type scale carries the hierarchy instead of borders.
+ * ------------------------------------------------------------------ */
 :root{
-  --bg:#f3f2f1; --surface:#ffffff; --ink:#323130; --muted:#605e5c;
-  --line:#e1dfdd; --line-strong:#c8c6c4; --accent:#5b4be6; --accent-soft:#eceafb;
-  --hover:#f5f4f8; --good:#0b6a0b; --good-soft:#dff6dd;
+  --bg:#f7f8fa; --surface:#ffffff; --surface-2:#fbfbfd;
+  --ink:#12141a; --ink-soft:#3d4350; --muted:#6b7280;
+  --line:rgba(18,20,26,.07); --line-strong:rgba(18,20,26,.12);
+  --accent:#5b52e8; --accent-2:#9b5cf6; --accent-ink:#4a41d6;
+  --accent-wash:rgba(91,82,232,.09);
+  --hover:rgba(18,20,26,.035);
+  --good:#0f7a4a; --good-wash:rgba(15,122,74,.10);
+  --shadow-1:0 1px 2px rgba(16,24,40,.04), 0 1px 3px rgba(16,24,40,.03);
+  --shadow-2:0 2px 4px rgba(16,24,40,.04), 0 12px 28px -10px rgba(16,24,40,.16);
+  --radius:16px; --radius-sm:12px;
 }
 html[data-theme="dark"]{
-  --bg:#1b1a19; --surface:#252423; --ink:#f3f2f1; --muted:#a19f9d;
-  --line:#3b3a39; --line-strong:#484644; --accent:#a08bff; --accent-soft:#2c2740;
-  --hover:#2d2b2a; --good:#5ec75e; --good-soft:#1e3320;
+  --bg:#0a0c11; --surface:#14171f; --surface-2:#171b24;
+  --ink:#e9ebf1; --ink-soft:#c2c7d2; --muted:#949bab;
+  --line:rgba(255,255,255,.08); --line-strong:rgba(255,255,255,.14);
+  --accent:#8b86ff; --accent-2:#b98cff; --accent-ink:#a49fff;
+  --accent-wash:rgba(139,134,255,.14);
+  --hover:rgba(255,255,255,.045);
+  --good:#5fd39a; --good-wash:rgba(95,211,154,.14);
+  --shadow-1:0 1px 2px rgba(0,0,0,.30);
+  --shadow-2:0 2px 6px rgba(0,0,0,.30), 0 16px 34px -12px rgba(0,0,0,.55);
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);
-  font:14px/1.5 "Segoe UI","Segoe UI Web (West European)",-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif}
-a{color:inherit}
-/* site header */
-.site-header{background:var(--surface);border-bottom:1px solid var(--line);padding:0 24px}
-.site-header .inner{max-width:1200px;margin:0 auto;height:52px;display:flex;align-items:center;justify-content:space-between;gap:16px}
-.brandline{display:flex;align-items:center;gap:11px;min-width:0}
-.logo{width:30px;height:30px;border-radius:4px;background:linear-gradient(135deg,var(--accent),#8b5cf6);display:grid;place-items:center;flex:0 0 auto}
-.logo svg{width:18px;height:18px}
-.site-title{font-size:15px;font-weight:600;letter-spacing:-.1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.theme{border:1px solid var(--line-strong);background:var(--surface);color:var(--muted);border-radius:4px;
-  padding:6px 11px;cursor:pointer;font:inherit;font-size:12.5px;display:flex;gap:6px;align-items:center}
-.theme:hover{background:var(--hover);color:var(--ink)}
-/* command / nav bar */
-.navbar{background:var(--surface);border-bottom:1px solid var(--line);padding:0 24px;position:sticky;top:0;z-index:5}
-.navbar .inner{max-width:1200px;margin:0 auto;height:44px;display:flex;align-items:center;justify-content:space-between;gap:16px}
-.nav{display:flex;gap:2px;height:100%}
-.nav a{display:flex;align-items:center;padding:0 13px;height:100%;font-size:13.5px;font-weight:600;color:var(--ink);
-  text-decoration:none;border-bottom:2px solid transparent;cursor:pointer}
-.nav a:hover{background:var(--hover)}
-.nav a.active{border-bottom-color:var(--accent);color:var(--accent)}
-.search{position:relative;width:250px;max-width:38vw}
-.search input{width:100%;padding:7px 10px 7px 32px;border:1px solid var(--line-strong);border-radius:4px;
-  font:inherit;font-size:13px;background:var(--surface);color:var(--ink)}
-.search input:focus{outline:0;border-color:var(--accent)}
-.search svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--muted)}
-/* page */
-.page{max-width:1200px;margin:0 auto;padding:26px 24px 70px}
-.webpart{margin-bottom:30px}
-.wp-head{display:flex;align-items:baseline;gap:10px;margin:0 0 14px}
-.wp-head h2{font-size:18px;font-weight:600;margin:0;letter-spacing:-.2px}
-.wp-head .n{font-size:12.5px;color:var(--muted)}
-/* quick-link tiles */
-.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
-.tile{position:relative;display:flex;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--line);
-  border-radius:6px;padding:14px 15px;text-decoration:none;color:inherit;transition:background .1s,border-color .1s,box-shadow .1s}
-a.tile:hover{background:var(--hover);border-color:var(--line-strong);box-shadow:0 1.6px 3.6px rgba(0,0,0,.08),0 .3px .9px rgba(0,0,0,.06)}
-.tile .ic{flex:0 0 40px;width:40px;height:40px;border-radius:5px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent)}
-.tile .ic svg{width:22px;height:22px}
-.tile .t{min-width:0}
-.tile .t .name{font-size:14px;font-weight:600;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
-.tile .t .desc{font-size:12.5px;color:var(--muted);margin-top:2px}
-.tile.pending{border-style:dashed;background:transparent}
-.tile.pending .ic{background:var(--hover);color:var(--muted)}
-a.tile .go{position:absolute;right:12px;top:12px;color:var(--accent);opacity:0;transition:.12s;font-size:13px}
-a.tile:hover .go{opacity:1}
-/* document-library list */
-.doclist{background:var(--surface);border:1px solid var(--line);border-radius:6px;overflow:hidden}
-.doclist .hrow,.doclist .row{display:grid;grid-template-columns:34px 1fr auto;gap:12px;align-items:center;padding:0 16px}
-.doclist .hrow{height:38px;border-bottom:1px solid var(--line);font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
-.doclist .row{min-height:48px;border-bottom:1px solid var(--line);text-decoration:none;color:inherit}
-.doclist .row:last-child{border-bottom:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font:15px/1.55 "Segoe UI Variable Display","Segoe UI",-apple-system,BlinkMacSystemFont,
+       "Inter",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  min-height:100vh;
+}
+/* an ambient wash, so the page is not a flat grey field */
+body::before{
+  content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(70rem 40rem at 8% -12%, var(--accent-wash), transparent 60%),
+    radial-gradient(60rem 34rem at 100% 0%, rgba(155,92,246,.07), transparent 62%);
+}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+
+/* ---------------- header ---------------- */
+.site-header{padding:22px 28px 0}
+.site-header .inner{max-width:1120px;margin:0 auto;display:flex;align-items:center;
+  justify-content:space-between;gap:18px}
+.brandline{display:flex;align-items:center;gap:13px;min-width:0}
+.logo{width:38px;height:38px;border-radius:11px;flex:0 0 auto;display:grid;place-items:center;
+  background:linear-gradient(140deg,var(--accent),var(--accent-2));
+  box-shadow:0 4px 14px -4px rgba(91,82,232,.55)}
+.logo svg{width:20px;height:20px}
+.site-title{font-size:19px;font-weight:650;letter-spacing:-.3px;line-height:1.2}
+.site-sub{font-size:12.5px;color:var(--muted);margin-top:1px}
+.theme{
+  border:0;background:var(--surface);color:var(--ink-soft);border-radius:999px;
+  padding:9px 15px;cursor:pointer;font:inherit;font-size:13px;font-weight:550;
+  display:flex;gap:7px;align-items:center;box-shadow:var(--shadow-1);
+  transition:transform .14s ease, box-shadow .14s ease, color .14s ease
+}
+.theme:hover{color:var(--ink);box-shadow:var(--shadow-2);transform:translateY(-1px)}
+
+/* ---------------- nav + search ---------------- */
+.bar{position:sticky;top:0;z-index:5;padding:18px 28px 14px;
+  background:linear-gradient(var(--bg) 62%, transparent);
+  backdrop-filter:saturate(140%) blur(6px)}
+.bar .inner{max-width:1120px;margin:0 auto;display:flex;align-items:center;
+  justify-content:space-between;gap:16px;flex-wrap:wrap}
+/* a segmented control, not underlined tabs */
+.nav{display:flex;gap:3px;padding:4px;border-radius:999px;
+  background:var(--surface);box-shadow:var(--shadow-1);flex-wrap:wrap}
+.nav a{
+  display:flex;align-items:center;padding:8px 16px;border-radius:999px;
+  font-size:13.5px;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap;
+  transition:color .14s ease, background .14s ease
+}
+.nav a:hover{color:var(--ink);background:var(--hover)}
+.nav a.active{
+  color:#fff;background:linear-gradient(140deg,var(--accent),var(--accent-2));
+  box-shadow:0 3px 10px -3px rgba(91,82,232,.6)
+}
+.search{position:relative;flex:1 1 240px;max-width:340px}
+.search input{
+  width:100%;padding:11px 14px 11px 40px;border:0;border-radius:999px;
+  font:inherit;font-size:13.5px;background:var(--surface);color:var(--ink);
+  box-shadow:var(--shadow-1);transition:box-shadow .14s ease
+}
+.search input::placeholder{color:var(--muted)}
+.search input:focus{outline:0;box-shadow:var(--shadow-2),0 0 0 2px var(--accent)}
+.search svg{position:absolute;left:15px;top:50%;transform:translateY(-50%);
+  width:16px;height:16px;color:var(--muted);pointer-events:none}
+
+/* ---------------- page ---------------- */
+.page{max-width:1120px;margin:0 auto;padding:10px 28px 80px}
+.webpart{margin-bottom:38px}
+.wp-head{display:flex;align-items:baseline;gap:11px;margin:0 0 16px;padding-left:2px}
+.wp-head h2{font-size:23px;font-weight:650;margin:0;letter-spacing:-.5px}
+.wp-head .n{font-size:12.5px;color:var(--muted);font-weight:500}
+
+/* ---------------- tiles ---------------- */
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:14px}
+.tile{
+  position:relative;display:flex;gap:15px;align-items:flex-start;
+  background:var(--surface);border-radius:var(--radius);padding:18px 19px;
+  box-shadow:var(--shadow-1);
+  transition:transform .16s ease, box-shadow .16s ease
+}
+a.tile:hover{transform:translateY(-3px);box-shadow:var(--shadow-2)}
+.tile .ic{
+  flex:0 0 46px;width:46px;height:46px;border-radius:13px;display:grid;place-items:center;
+  background:linear-gradient(145deg,var(--accent-wash),transparent 85%);
+  color:var(--accent-ink);
+  box-shadow:inset 0 0 0 1px var(--line)
+}
+a.tile:hover .ic{background:linear-gradient(140deg,var(--accent),var(--accent-2));color:#fff;
+  box-shadow:0 4px 12px -4px rgba(91,82,232,.6)}
+.tile .ic svg{width:23px;height:23px}
+.tile .t{min-width:0;padding-top:1px}
+.tile .t .name{font-size:15.5px;font-weight:620;letter-spacing:-.2px;
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;line-height:1.3}
+.tile .t .desc{font-size:13px;color:var(--muted);margin-top:4px;line-height:1.5}
+.tile .tmeta{display:flex;align-items:center;gap:7px;margin-top:11px;
+  font-size:11.5px;color:var(--muted);min-width:0}
+.tile .tmeta .host{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dot{width:7px;height:7px;border-radius:999px;background:var(--line-strong);flex:0 0 auto}
+.dot.live{background:var(--good);box-shadow:0 0 0 3px var(--good-wash)}
+.tile.pending{background:var(--surface-2);box-shadow:inset 0 0 0 1px var(--line)}
+.tile.pending .ic{background:var(--hover);color:var(--muted);box-shadow:none}
+a.tile .go{
+  position:absolute;right:15px;top:15px;color:var(--accent-ink);font-size:14px;
+  opacity:0;transform:translate(-3px,3px);transition:.16s ease
+}
+a.tile:hover .go{opacity:1;transform:none}
+
+/* ---------------- document list ---------------- */
+/* one soft surface with hairline dividers, rather than a bordered table */
+.doclist{background:var(--surface);border-radius:var(--radius);overflow:hidden;
+  box-shadow:var(--shadow-1)}
+.doclist .row{
+  display:grid;grid-template-columns:44px 1fr auto;gap:14px;align-items:center;
+  padding:15px 19px;position:relative;transition:background .14s ease
+}
+.doclist .row + .row::before{
+  content:'';position:absolute;left:19px;right:19px;top:0;height:1px;background:var(--line)
+}
 .doclist a.row:hover{background:var(--hover)}
-.doclist .fi{color:var(--accent);display:grid;place-items:center}
+.doclist .fi{
+  width:38px;height:38px;border-radius:11px;display:grid;place-items:center;
+  background:linear-gradient(145deg,var(--accent-wash),transparent 85%);
+  color:var(--accent-ink);box-shadow:inset 0 0 0 1px var(--line)
+}
+.doclist a.row:hover .fi{background:linear-gradient(140deg,var(--accent),var(--accent-2));
+  color:#fff;box-shadow:none}
 .doclist .fi svg{width:20px;height:20px}
-.doclist .nm{display:flex;flex-direction:column;justify-content:center;min-width:0;padding:8px 0}
-.doclist .nm .name{font-size:13.5px;font-weight:600}
-.doclist .nm .desc{font-size:12px;color:var(--muted);margin-top:1px}
-.doclist .meta{font-size:12px;color:var(--muted)}
-.doclist .row.pending .fi{color:var(--muted)}
-.chip{font-size:10px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;padding:2px 7px;border-radius:3px}
-.chip.live{background:var(--good-soft);color:var(--good)}
-.chip.soon{background:var(--hover);color:var(--muted);border:1px solid var(--line)}
-.empty{color:var(--muted);font-size:13.5px;padding:24px;text-align:center;border:1px dashed var(--line-strong);border-radius:6px;background:var(--surface)}
-.foot{max-width:1200px;margin:0 auto;padding:0 24px 40px;color:var(--muted);font-size:12px}
+.doclist .nm{min-width:0}
+.doclist .nm .name{font-size:14.5px;font-weight:600;letter-spacing:-.15px}
+.doclist .nm .desc{font-size:12.5px;color:var(--muted);margin-top:2px}
+.doclist .meta{font-size:12px;color:var(--muted);white-space:nowrap}
+.doclist .row.pending .fi{background:var(--hover);color:var(--muted);box-shadow:none}
+
+/* ---------------- bits ---------------- */
+.chip{font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;
+  padding:3px 9px;border-radius:999px;white-space:nowrap}
+.chip.live{background:var(--good-wash);color:var(--good)}
+.chip.soon{background:var(--hover);color:var(--muted)}
+.empty{color:var(--muted);font-size:14px;padding:44px 24px;text-align:center;
+  border-radius:var(--radius);background:var(--surface-2);
+  box-shadow:inset 0 0 0 1px var(--line)}
+.foot{max-width:1120px;margin:0 auto;padding:0 28px 48px;color:var(--muted);font-size:12.5px}
+
+@media (max-width:640px){
+  .site-header,.bar,.page,.foot{padding-left:18px;padding-right:18px}
+  .wp-head h2{font-size:20px}
+  .tiles{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none !important}
+  a.tile:hover{transform:none}
+}
 </style>
 </head>
 <body>
@@ -88,21 +203,24 @@ a.tile:hover .go{opacity:1}
   <div class="inner">
     <div class="brandline">
       <div class="logo"><svg viewBox="0 0 24 24" fill="none"><path d="M4 8h16M4 12h16M4 16h16" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><circle cx="8" cy="8" r="1.6" fill="#fff"/><circle cx="15" cy="16" r="1.6" fill="#fff"/></svg></div>
-      <div class="site-title">Sales Operations Hub</div>
+      <div>
+        <div class="site-title">Sales Operations Hub</div>
+        <div class="site-sub">Tools, dashboards and playbooks in one place</div>
+      </div>
     </div>
     <button class="theme" id="themeBtn">🌙 <span>Dark</span></button>
   </div>
 </header>
 
-<nav class="navbar">
+<div class="bar">
   <div class="inner">
-    <div class="nav" id="nav"></div>
+    <nav class="nav" id="nav"></nav>
     <div class="search">
       <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       <input type="text" id="search" placeholder="Search this hub" autocomplete="off">
     </div>
   </div>
-</nav>
+</div>
 
 <main class="page" id="sections"></main>
 <div class="foot">Quilt Software · Sales Operations Hub — internal · <span id="count"></span></div>
@@ -132,6 +250,7 @@ const SECTIONS = [
   ]},
 ];
 
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
 const hostOf = url => { try{ return new URL(url).hostname.replace(/^www\./,''); }catch{ return ''; } };
 const svg = n => '<svg viewBox="0 0 24 24" fill="none">'+(ICONS[n]||ICONS.doc)+'</svg>';
@@ -139,30 +258,43 @@ const chipFor = it => it.status==='live' ? '<span class="chip live">Live</span>'
 
 function fmtDate(iso){ try{ return new Date(iso+'T00:00:00').toLocaleString('en-US',{month:'short',year:'numeric'}); }catch{ return ''; } }
 function tileHTML(it,showDate){
-  const dateLine=(showDate&&it.published)?' · Added '+fmtDate(it.published):'';
+  /* The status chip sits on its own meta line rather than beside the name.
+   * Inline, it wrapped to a second line whenever a name was long, so tiles in
+   * the same row came out different heights. The line doubles as somewhere to
+   * show the destination host, which is worth having on a page of links. */
+  const bits=[];
+  if(it.url) bits.push(esc(hostOf(it.url)));
+  if(showDate&&it.published) bits.push('Added '+fmtDate(it.published));
+  /* "Live" was a chip on every working link, which is no signal at all and,
+   * next to a long hostname, wrapped the line and made tiles uneven. Live is
+   * now a dot; the chip is kept for the one state worth calling out. */
+  const head = it.url
+    ? '<span class="dot' + (it.status==='live' ? ' live' : '') + '"></span>'
+    : chipFor(it);
+  const meta = (bits.length||head)
+    ? '<div class="tmeta">'+head+(bits.length?'<span class="host">'+bits.join(' · ')+'</span>':'')+'</div>'
+    : '';
   const inner='<div class="ic">'+svg(it.icon)+'</div>'+
-    '<div class="t"><div class="name">'+it.name+' '+chipFor(it)+'</div><div class="desc">'+it.desc+dateLine+'</div></div>';
-  return it.url ? '<a class="tile" href="'+it.url+'" target="_blank" rel="noopener"><span class="go">↗</span>'+inner+'</a>'
+    '<div class="t"><div class="name">'+esc(it.name)+'</div>'+
+    '<div class="desc">'+esc(it.desc)+'</div>'+meta+'</div>';
+  return it.url ? '<a class="tile" href="'+esc(it.url)+'" target="_blank" rel="noopener"><span class="go">↗</span>'+inner+'</a>'
                 : '<div class="tile pending">'+inner+'</div>';
 }
 function rowHTML(it){
-  const meta = it.url ? hostOf(it.url) : chipFor(it);
+  const meta = it.url ? esc(hostOf(it.url)) : chipFor(it);
   const inner='<div class="fi">'+svg(it.icon)+'</div>'+
-    '<div class="nm"><div class="name">'+it.name+'</div><div class="desc">'+it.desc+'</div></div>'+
+    '<div class="nm"><div class="name">'+esc(it.name)+'</div><div class="desc">'+esc(it.desc)+'</div></div>'+
     '<div class="meta">'+meta+'</div>';
-  return it.url ? '<a class="row" href="'+it.url+'" target="_blank" rel="noopener">'+inner+'</a>'
+  return it.url ? '<a class="row" href="'+esc(it.url)+'" target="_blank" rel="noopener">'+inner+'</a>'
                 : '<div class="row pending">'+inner+'</div>';
 }
 
 let activeSection=null, query='';
 function webpartHTML(title,layout,items,id,showDate){
-  let body;
-  if(layout==='list'){
-    body='<div class="doclist"><div class="hrow"><span></span><span>Name</span><span>Source</span></div>'+items.map(rowHTML).join('')+'</div>';
-  } else {
-    body='<div class="tiles">'+items.map(it=>tileHTML(it,showDate)).join('')+'</div>';
-  }
-  return '<section class="webpart" id="'+id+'"><div class="wp-head"><h2>'+title+'</h2>'+
+  const body = layout==='list'
+    ? '<div class="doclist">'+items.map(rowHTML).join('')+'</div>'
+    : '<div class="tiles">'+items.map(it=>tileHTML(it,showDate)).join('')+'</div>';
+  return '<section class="webpart" id="'+id+'"><div class="wp-head"><h2>'+esc(title)+'</h2>'+
          '<span class="n">'+items.length+' item'+(items.length!==1?'s':'')+'</span></div>'+body+'</section>';
 }
 function render(){
@@ -184,20 +316,26 @@ function render(){
       if(items.length){ shown=items.length; html+=webpartHTML(sec.title,sec.layout,items,slug(sec.title)); } }
   }
   document.getElementById('sections').innerHTML = shown ? html
-    : '<div class="empty">No results'+(q?' for “'+query.trim()+'”':'')+'.</div>';
+    : '<div class="empty">No results'+(q?' for “'+esc(query.trim())+'”':'')+'.</div>';
   document.getElementById('count').textContent = SECTIONS.reduce((n,s)=>n+s.items.length,0)+' resources';
 }
 
 // build top nav from sections (Home + one tab per section)
 (function buildNav(){
   const nav=document.getElementById('nav');
-  nav.innerHTML='<a class="active">Home</a>'+SECTIONS.map(s=>'<a data-title="'+s.title+'">'+s.title+'</a>').join('');
-  nav.addEventListener('click',e=>{
-    const a=e.target.closest('a'); if(!a)return;
+  nav.innerHTML='<a class="active" tabindex="0">Home</a>'+
+    SECTIONS.map(s=>'<a tabindex="0" data-title="'+esc(s.title)+'">'+esc(s.title)+'</a>').join('');
+  const pick=a=>{
     [...nav.children].forEach(x=>x.classList.toggle('active',x===a));
     activeSection=a.dataset.title||null;
     window.scrollTo({top:0});
     render();
+  };
+  nav.addEventListener('click',e=>{ const a=e.target.closest('a'); if(a) pick(a); });
+  nav.addEventListener('keydown',e=>{
+    if(e.key!=='Enter'&&e.key!==' ')return;
+    const a=e.target.closest('a'); if(!a)return;
+    e.preventDefault(); pick(a);
   });
 })();
 
