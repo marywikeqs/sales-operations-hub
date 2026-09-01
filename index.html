@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -118,7 +118,8 @@ a{color:inherit;text-decoration:none}
 }
 .channel:hover{transform:translateY(-3px);box-shadow:var(--shadow-lift);border-color:var(--accent-light)}
 .channel-icon{
-  font-size:32px;margin-bottom:12px;width:48px;height:48px;display:grid;place-items:center
+  font-size:11px;font-weight:700;margin-bottom:12px;width:48px;height:48px;display:grid;place-items:center;
+  background:var(--accent-light);color:var(--accent);border-radius:8px;letter-spacing:0.5px;text-transform:uppercase
 }
 .channel h3{margin:0 0 8px;font-size:15px;font-weight:700;letter-spacing:-.2px;line-height:1.3}
 .channel p{margin:0;font-size:13px;color:var(--muted);line-height:1.5;flex:1}
@@ -217,7 +218,7 @@ a{color:inherit;text-decoration:none}
 <div class="header">
   <button class="toggle-sidebar" id="toggleSidebar" aria-label="Toggle sidebar">☰</button>
   <div class="header-spacer"></div>
-  <button class="theme-btn" id="themeBtn">🌙 Dark</button>
+  <button class="theme-btn" id="themeBtn">☀️ Light</button>
 </div>
 
 <div class="container">
@@ -297,13 +298,13 @@ a{color:inherit;text-decoration:none}
 
 <script>
 const CHANNELS = [
-  { title:'Bookings Rules', desc:'Master reference for booking processes, fields, and commission calculations.', icon:'📋', url:'https://master-bookings-rules.up.railway.app/' },
-  { title:'Pricing & Discounting', desc:'Rate cards, discount bands & approval thresholds.', icon:'💰' },
-  { title:'Sales Process & Deal Stages', desc:'Stage definitions, exit criteria & handoffs.', icon:'📊' },
-  { title:'Compensation & Commission', desc:'Commission plans, comp tracking & payouts.', icon:'💵' },
-  { title:'Reporting & Analytics', desc:'Dashboards, reports & data access.', icon:'📈', url:'https://cx.quiltteam.com/sfdc-shortcut' },
-  { title:'Systems & Access', desc:'Salesforce access, tool onboarding & permissions.', icon:'🔐' },
-  { title:'Ask Sales Ops', desc:'General questions or special requests.', icon:'💬' },
+  { title:'Bookings Rules', desc:'Master reference for booking processes, fields, and commission calculations.', icon:'BR' },
+  { title:'Pricing & Discounting', desc:'Rate cards, discount bands & approval thresholds.', icon:'PD' },
+  { title:'Sales Documents', desc:'Process guides, playbooks, and sales enablement materials.', icon:'SD' },
+  { title:'Compensation & Commission', desc:'Commission plans, comp tracking & payouts.', icon:'CC' },
+  { title:'Reporting & Analytics', desc:'Dashboards, reports & data access.', icon:'RA', url:'https://cx.quiltteam.com/sfdc-shortcut' },
+  { title:'Systems & Access', desc:'Salesforce access, tool onboarding & permissions.', icon:'SA' },
+  { title:'Ask Sales Ops', desc:'General questions or special requests.', icon:'ASO' },
 ];
 
 const FAQ = [
