@@ -104,7 +104,7 @@ a{color:inherit;text-decoration:none}
   width:16px;height:16px;color:var(--muted);pointer-events:none}
 
 /* content wrapper */
-.content-wrapper{padding:32px 40px;display:grid;grid-template-columns:1fr 360px;gap:32px}
+.content-wrapper{padding:32px 40px;display:grid;grid-template-columns:1fr;gap:32px}
 
 /* channels */
 .channels h2{margin:0 0 20px;font-size:18px;font-weight:750;letter-spacing:-.4px}
@@ -129,62 +129,6 @@ a{color:inherit;text-decoration:none}
 }
 .channel-action::after{content:'→';font-weight:400}
 
-/* faq */
-.faq h2{margin:0 0 20px;font-size:18px;font-weight:750;letter-spacing:-.4px}
-.faq-search{margin:0 0 20px;position:relative}
-.faq-search input{
-  width:100%;padding:11px 38px 11px 36px;border:1px solid var(--line);border-radius:8px;
-  font:inherit;font-size:14px;background:var(--surface);color:var(--ink);
-  box-shadow:var(--shadow-card);transition:border-color .2s
-}
-.faq-search input::placeholder{color:var(--muted)}
-.faq-search input:focus{outline:0;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-light)}
-.faq-search .mag{position:absolute;left:12px;top:50%;transform:translateY(-50%);
-  width:16px;height:16px;color:var(--muted);pointer-events:none}
-.faq-items{display:flex;flex-direction:column;gap:0}
-.faq-item{
-  background:var(--surface);border:1px solid var(--line);border-bottom:0;
-  padding:0
-}
-.faq-item:last-child{border-bottom:1px solid var(--line)}
-.faq-trigger{
-  width:100%;text-align:left;background:none;border:0;padding:14px 16px;cursor:pointer;
-  font-size:14px;font-weight:600;color:var(--ink);display:flex;align-items:center;
-  justify-content:space-between;gap:10px;transition:background .2s
-}
-.faq-trigger:hover{background:var(--surface-2)}
-.faq-trigger.open{color:var(--accent)}
-.faq-icon{width:5px;height:5px;border-top:2px solid currentColor;border-right:2px solid currentColor;
-  transform:rotate(45deg) translateY(-2px);transition:transform .2s}
-.faq-trigger.open .faq-icon{transform:rotate(135deg) translateY(2px)}
-.faq-answer{
-  display:none;padding:0 16px 16px;font-size:13.5px;color:var(--muted);line-height:1.7;
-  background:var(--surface-2)
-}
-.faq-answer.open{display:block}
-
-/* sidebar form */
-.sidebar-form{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);
-  padding:24px;box-shadow:var(--shadow-card);position:sticky;top:32px
-}
-.sidebar-form h3{margin:0 0 8px;font-size:15px;font-weight:750;letter-spacing:-.2px}
-.sidebar-form p{margin:0 0 16px;font-size:12.5px;color:var(--muted);line-height:1.6}
-.form-group{margin:0 0 14px}
-.form-group label{display:block;font-size:13px;font-weight:600;margin:0 0 6px;color:var(--ink-2)}
-.form-group input,.form-group textarea{
-  width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:6px;
-  font:inherit;font-size:13px;background:var(--surface);color:var(--ink);
-  transition:border-color .2s
-}
-.form-group input:focus,.form-group textarea:focus{
-  outline:0;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-light)
-}
-.form-group textarea{min-height:90px;font-family:inherit;resize:vertical}
-.form-submit{
-  width:100%;padding:11px 16px;border:0;border-radius:6px;background:var(--accent);
-  color:#fff;font-size:13px;font-weight:650;cursor:pointer;transition:background .2s
-}
-.form-submit:hover{background:var(--accent-dark)}
 
 /* footer */
 .footer{
@@ -205,7 +149,6 @@ a{color:inherit;text-decoration:none}
   .hero h1{font-size:20px}
   .content-wrapper{padding:20px 16px;gap:20px}
   .channels-grid{grid-template-columns:1fr}
-  .sidebar-form{position:static}
 }
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
@@ -229,13 +172,6 @@ a{color:inherit;text-decoration:none}
         <li><a href="https://cx.quiltteam.com/sfdc-shortcut" target="_blank" rel="noopener">Salesforce Projects</a></li>
       </ul>
     </div>
-    <div class="sidebar-section">
-      <h3 class="sidebar-title">Support</h3>
-      <ul class="sidebar-items">
-        <li><a href="#faqItems">FAQs</a></li>
-        <li><a href="#ticketForm">Submit Ticket</a></li>
-      </ul>
-    </div>
   </aside>
 
   <main class="main-content">
@@ -254,40 +190,9 @@ a{color:inherit;text-decoration:none}
           <h2>How can we help?</h2>
           <div class="channels-grid" id="channelsGrid"></div>
 
-          <section class="faq">
-            <h2>Frequently Asked Questions</h2>
-            <div class="faq-search">
-              <svg class="mag" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2.2"/><path d="m20 20-3-3" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
-              <input type="text" id="faqSearch" placeholder="Search FAQs..." autocomplete="off" aria-label="Search FAQs">
-            </div>
-            <div class="faq-items" id="faqItems"></div>
-          </section>
         </section>
       </div>
 
-      <aside>
-        <form class="sidebar-form" id="ticketForm">
-          <h3>Submit a Ticket</h3>
-          <p>We'll respond within 24 hours</p>
-          <div class="form-group">
-            <label for="name">Name</label>
-            <input type="text" id="name" name="name" required aria-label="Your name">
-          </div>
-          <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" name="email" required aria-label="Your email">
-          </div>
-          <div class="form-group">
-            <label for="subject">Subject</label>
-            <input type="text" id="subject" name="subject" required aria-label="Ticket subject">
-          </div>
-          <div class="form-group">
-            <label for="message">Message</label>
-            <textarea id="message" name="message" required aria-label="Ticket message"></textarea>
-          </div>
-          <button type="submit" class="form-submit">Submit Ticket</button>
-        </form>
-      </aside>
     </div>
   </main>
 </div>
@@ -306,24 +211,14 @@ const CHANNELS = [
   { title:'Ask Sales Ops', desc:'General questions or special requests.', icon:'ASO' },
 ];
 
-const FAQ = [
-  { q:'How do I request a discount on a deal?', a:'Discounts up to 10% can be approved by your manager. Beyond that, submit a request through Sales Ops and we\'ll review within 24 hours.' },
-  { q:'What are the current rate cards?', a:'Rate cards are maintained in the Pricing Guidelines resource. Contact Sales Ops for the latest version specific to your territory.' },
-  { q:'How do I track my commission?', a:'Commission information is available in Salesforce under Reports. If you need help accessing reports, submit a ticket.' },
-  { q:'How do I get Salesforce access?', a:'Request access through Systems & Access channel above. Provisioning typically takes 1-2 business days.' },
-  { q:'What data can I access?', a:'Standard sales team members have access to their own pipeline and account data. Custom dashboards or cross-team data requires manager approval.' },
-  { q:'Where are playbooks and processes documented?', a:'All sales processes and playbooks will be linked in the Resources section as they\'re finalized. Contact Sales Ops if you need something specific.' },
-];
-
 let query = '';
-let faqQuery = '';
 
 function renderChannels(){
   const filtered = query.toLowerCase() === '' ? CHANNELS :
     CHANNELS.filter(c => (c.title + ' ' + c.desc).toLowerCase().includes(query.toLowerCase()));
 
   document.getElementById('channelsGrid').innerHTML = filtered.map(c => `
-    <${c.url ? 'a href="' + c.url + '" target="_blank" rel="noopener"' : 'div'} class="channel">
+    <${c.url ? 'a href="' + c.url + '"' : 'div'} class="channel">
       <div class="channel-icon">${c.icon}</div>
       <h3>${c.title}</h3>
       <p>${c.desc}</p>
@@ -332,34 +227,6 @@ function renderChannels(){
   `).join('');
 }
 
-function renderFAQ(){
-  const filtered = faqQuery.toLowerCase() === '' ? FAQ :
-    FAQ.filter(f => (f.q + ' ' + f.a).toLowerCase().includes(faqQuery.toLowerCase()));
-
-  document.getElementById('faqItems').innerHTML = filtered.map((f, i) => `
-    <div class="faq-item">
-      <button class="faq-trigger" data-index="${i}">
-        ${f.q}
-        <span class="faq-icon"></span>
-      </button>
-      <div class="faq-answer" data-index="${i}">${f.a}</div>
-    </div>
-  `).join('');
-
-  document.querySelectorAll('.faq-trigger').forEach(btn => {
-    btn.addEventListener('click', e => {
-      const idx = e.currentTarget.dataset.index;
-      const answer = document.querySelector(`.faq-answer[data-index="${idx}"]`);
-      const isOpen = answer.classList.contains('open');
-      document.querySelectorAll('.faq-answer').forEach(a => a.classList.remove('open'));
-      document.querySelectorAll('.faq-trigger').forEach(t => t.classList.remove('open'));
-      if(!isOpen){
-        answer.classList.add('open');
-        e.currentTarget.classList.add('open');
-      }
-    });
-  });
-}
 
 document.getElementById('toggleSidebar').addEventListener('click', () => {
   document.getElementById('sidebar').classList.toggle('collapsed');
@@ -370,16 +237,6 @@ document.getElementById('search').addEventListener('input', e => {
   renderChannels();
 });
 
-document.getElementById('faqSearch').addEventListener('input', e => {
-  faqQuery = e.target.value;
-  renderFAQ();
-});
-
-document.getElementById('ticketForm').addEventListener('submit', e => {
-  e.preventDefault();
-  alert('Ticket submission form is not yet configured. Please contact Sales Ops directly.');
-  e.target.reset();
-});
 
 document.getElementById('themeBtn').addEventListener('click', () => {
   const dark = document.documentElement.getAttribute('data-theme') === 'dark';
@@ -390,7 +247,6 @@ document.getElementById('themeBtn').addEventListener('click', () => {
 document.getElementById('yr').textContent = new Date().getFullYear();
 
 renderChannels();
-renderFAQ();
 </script>
 </body>
 </html>
