@@ -153,10 +153,10 @@ footer .qmark { width: 12px; height: 18px; }
 <main id="top">
   <div class="hero">
     <h1>Sales Operations</h1>
-    <p class="lede">Our team's apps, where to get help, and the dashboards we run on, all in one place.</p>
+    <p class="lede">Our team's apps and where to get help, all in one place.</p>
     <label class="search">
       <svg class="mag" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-      <input type="search" id="q" placeholder="Search apps, help and dashboards" autocomplete="off" aria-label="Search the hub">
+      <input type="search" id="q" placeholder="Search apps and help" autocomplete="off" aria-label="Search the hub">
       <kbd aria-hidden="true">/</kbd>
     </label>
   </div>
@@ -192,9 +192,7 @@ const SECTIONS = [
     { title: 'Personnel Change Form', desc: 'Submit a personnel change notice for sales team members.', ini: 'PC', url: 'https://personnel-notice-form-production-b723.up.railway.app/' },
     { title: 'Ask Sales Ops', desc: 'General questions or special requests.', ini: 'ASO', url: '' },
   ]},
-  { id: 'dashboards', name: 'Dashboards', icon: 'chart', note: 'Live views of our work.', kind: 'list', items: [
-    { title: 'Salesforce Projects', desc: 'Every Salesforce project and where it stands in Shortcut.', ini: 'SF', url: 'https://cx.quiltteam.com/sfdc-shortcut' },
-  ]},
+  // Salesforce Projects (the old Shortcut dashboard) now lives in the BRD Hub's Dashboard tab.
 ];
 
 // ---- rendering ----
