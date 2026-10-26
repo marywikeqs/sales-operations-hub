@@ -179,11 +179,10 @@ const ICONS = {
   chart: '<path d="M4 20h16"/><rect x="5.5" y="11" width="3" height="6" rx="1"/><rect x="10.5" y="7" width="3" height="10" rx="1"/><rect x="15.5" y="13" width="3" height="4" rx="1"/>',
 };
 const SECTIONS = [
-  { id: 'apps', name: 'Apps', icon: 'apps', note: 'Our team tools. Each has its own sign-in.', kind: 'apps', items: [
+  { id: 'apps', name: 'Apps', icon: 'apps', note: 'Our tools. Each has its own sign-in.', kind: 'apps', items: [
     { title: 'BRD Hub', desc: 'Submit a Salesforce BRD and follow it from intake to Go Live: board, sprints, sign-offs and UAT.', icon: 'board', url: 'https://brd-hub.vercel.app/', tag: 'Salesforce' },
-    { title: 'Team Portal', desc: "The Sales Ops team's own tools: Weekly Progress and Team Time Off.", icon: 'lock', url: '/portal', tag: 'Team sign-in', same: true },
-    { title: 'Commission Portal', desc: 'Compensation planning: Commission Plan Builder and what comes next.', icon: 'lock', url: '/commissions', tag: 'Separate sign-in', same: true },
   ]},
+  // The Team Portal and Commission Portal are linked from the sidebar only.
   { id: 'help', name: 'Get help', icon: 'help', note: 'Answers, documents and requests.', kind: 'list', items: [
     { title: 'Pricing & Discounting', desc: 'Rate cards, discount structures and pricing strategies.', ini: 'PD', url: 'https://pricing-hub-production-2481.up.railway.app/' },
     { title: 'Sales Documents', desc: 'Bookings rules, playbooks, guides and enablement materials.', ini: 'SD', url: 'https://sales-documents-hub-production.up.railway.app/' },
