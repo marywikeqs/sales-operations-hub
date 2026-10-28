@@ -40,11 +40,11 @@ PORTALS = {
         ]},
     "commissions": {
         "name": "Commission Portal", "env": "COMMISSION_PASSWORD", "section": "Commission apps",
-        "lede": "Compensation planning: plans, quotas and allocations. Each app still has its own sign-in.",
+        "lede": "Compensation planning: plans, quotas and allocations. Sign in with your own email and password.",
         "apps": [
             {"title": "Commission Plan Builder", "tag": "Sales Ops only", "icon": "plan",
              "desc": "Build and export written comp plans, quotas and allocations.",
-             "url": "https://commission-planner.vercel.app/"},
+             "url": "https://commission-planner.vercel.app/login"},
         ]},
 }
 
