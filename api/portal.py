@@ -1,34 +1,44 @@
 """
 The hub's signed-in areas: the Team Portal (/portal) and the Commission Portal
-(/commissions). Each has its own password, so signing in to one doesn't open
-the other.
+(/commissions). Signing in to one doesn't open the other.
 
-Vercel sends /<portal>, /<portal>/login and /<portal>/logout here (vercel.json).
-Passwords are environment variables in the Vercel project (PORTAL_PASSWORD,
-COMMISSION_PASSWORD); a signed sign-in cookie keeps people in for 30 days.
-Nothing is stored, so it works the same on every copy of the function, and
-changing a password signs everyone out of that portal. A portal with no
-password set stays closed.
+The Team Portal has its own people (Mary, 2026-10: "anyone can access the hub
+but not everyone should access the team portal"): each signs in with their
+email and a password an admin sets at /portal/users. The list lives in the
+Upstash database connected to the hub project (key hub:users; no names in this
+public repo). "admin" with PORTAL_PASSWORD always works, so nobody is locked
+out. The Commission Portal keeps its one password (COMMISSION_PASSWORD); the
+hub's sidebar now links straight to the Commission Plan Builder's own sign-in.
+
+Vercel sends /<portal>, /<portal>/login, /logout and /portal/users here
+(vercel.json). A signed cookie keeps people in for 30 days. Changing someone's
+password or access, or removing them, signs them out; changing the portal
+password signs everyone out. A portal with no password set stays closed.
 
 Standard library only. To add an app, add it to that portal's apps below.
 """
 
 from __future__ import annotations
 
+import base64
 import hashlib
 import hmac
+import json
 import os
+import re
+import secrets
 import time
+import urllib.request
 from html import escape
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler
-from urllib.parse import parse_qs, urlsplit
+from urllib.parse import parse_qs, quote, urlsplit
 
 DAYS = 30
 
 PORTALS = {
     "portal": {
-        "name": "Team Portal", "env": "PORTAL_PASSWORD", "section": "Team apps",
+        "name": "Team Portal", "env": "PORTAL_PASSWORD", "section": "Team apps", "people": True,
         "lede": "The Sales Ops team's own tools. Each app still has its own sign-in.",
         "apps": [
             {"title": "Weekly Progress", "tag": "Every Friday", "icon": "progress",
@@ -40,6 +50,7 @@ PORTALS = {
         ]},
     "commissions": {
         "name": "Commission Portal", "env": "COMMISSION_PASSWORD", "section": "Commission apps",
+        "link": "https://commission-planner.vercel.app/login",
         "lede": "Compensation planning: plans, quotas and allocations. Sign in with your own email and password.",
         "apps": [
             {"title": "Commission Plan Builder", "tag": "Sales Ops only", "icon": "plan",
@@ -60,6 +71,7 @@ ICONS = {
              '<path d="M12 11v6M10.2 12.6c0-.7.8-1.2 1.8-1.2s1.8.5 1.8 1.2-.8 1-1.8 1.2-1.8.5-1.8 1.2.8 1.2 1.8 1.2 1.8-.5 1.8-1.2"/>'),
     "lock": '<rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/>',
     "back": '<path d="M19 12H5M11 6l-6 6 6 6"/>',
+    "users": '<circle cx="9" cy="9" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><circle cx="17" cy="10" r="2.5"/><path d="M15.5 14.6A4.5 4.5 0 0 1 21 19"/>',
     "out": '<path d="M14 4h4.5a1.5 1.5 0 0 1 1.5 1.5v13a1.5 1.5 0 0 1-1.5 1.5H14"/><path d="M10 16l-4-4 4-4M6 12h10"/>',
 }
 MARK = ('<svg viewBox="4 0 32 48"><path d="M20 2 34 16 20 30 6 16z" fill="#84B0D5"/>'
@@ -73,22 +85,101 @@ def svg(name: str, cls: str = "ti") -> str:
             f'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{ICONS[name]}</svg>')
 
 
+# ---------------- storage: the Upstash database connected to the hub project ----------------
+
+def _env_ending(*suffixes: str) -> str:
+    """An env var by name, or by its ending: Vercel can prefix storage variables (STORAGE_KV_REST_API_URL)."""
+    for x in suffixes:
+        if os.environ.get(x):
+            return os.environ[x]
+    for x in suffixes:
+        for k, v in sorted(os.environ.items()):
+            if k.endswith("_" + x) and v and "READ_ONLY" not in k:
+                return v
+    return ""
+
+
+KV_URL = _env_ending("KV_REST_API_URL", "UPSTASH_REDIS_REST_URL").rstrip("/")
+KV_TOKEN = _env_ending("KV_REST_API_TOKEN", "UPSTASH_REDIS_REST_TOKEN")
+
+
+def kv(*cmd):
+    req = urllib.request.Request(KV_URL, data=json.dumps(cmd).encode("utf-8"), method="POST",
+                                 headers={"Authorization": f"Bearer {KV_TOKEN}", "Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=10) as r:
+        out = json.loads(r.read())
+    if "error" in out:
+        raise OSError(out["error"])
+    return out["result"]
+
+
+def load_users() -> list:
+    if not KV_URL:
+        return []
+    raw = kv("GET", "hub:users")
+    return json.loads(raw) if raw else []
+
+
+def save_users(users: list) -> None:
+    if not KV_URL:
+        raise OSError("storage isn't connected")
+    kv("SET", "hub:users", json.dumps(users, separators=(",", ":")))
+
+
+def hash_password(pw: str) -> str:
+    salt = secrets.token_bytes(16)
+    return "pbkdf2$200000$" + salt.hex() + "$" + hashlib.pbkdf2_hmac("sha256", pw.encode("utf-8"), salt, 200000).hex()
+
+
+def check_password(pw: str, stored: str) -> bool:
+    try:
+        _, n, salt, h = (stored or "").split("$")
+        return hmac.compare_digest(hashlib.pbkdf2_hmac("sha256", pw.encode("utf-8"), bytes.fromhex(salt), int(n)).hex(), h)
+    except ValueError:
+        return False
+
+
+def make_password() -> str:
+    abc = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789"
+    return "".join(secrets.choice(abc) for _ in range(14))
+
+
 # ---------------- sign-in ----------------
+ADMIN = {"id": "admin", "name": "Admin", "email": "admin", "role": "admin", "sv": 0}
+
 
 def _key(slug: str) -> bytes:
-    return hashlib.sha256(f"hub-portal-session|{slug}|".encode() + password(slug).encode("utf-8")).digest()
+    return hashlib.sha256(f"hub-portal-session|{slug}|".encode() + password(slug).encode("utf-8")
+                          + b"|" + KV_TOKEN.encode("utf-8")).digest()
 
 
-def make_session(slug: str) -> str:
+def _sig(slug: str, uid: str, exp: str, sv) -> str:
+    return hmac.new(_key(slug), f"{uid}|{exp}|{sv}".encode("utf-8"), hashlib.sha256).hexdigest()
+
+
+def make_session(slug: str, user: dict = ADMIN) -> str:
     exp = str(int(time.time()) + DAYS * 86400)
-    return exp + "." + hmac.new(_key(slug), exp.encode(), hashlib.sha256).hexdigest()
+    return f"{user['id']}.{exp}.{_sig(slug, user['id'], exp, user.get('sv', 0))}"
 
 
-def session_ok(slug: str, value: str) -> bool:
-    exp, _, sig = (value or "").partition(".")
+def session_user(slug: str, value: str):
+    """Who a portal cookie belongs to, or None."""
+    uid, _, rest = (value or "").partition(".")
+    exp, _, sig = rest.partition(".")
     if not password(slug) or not exp.isdigit() or int(exp) < time.time():
-        return False
-    return hmac.compare_digest(sig, hmac.new(_key(slug), exp.encode(), hashlib.sha256).hexdigest())
+        return None
+    if uid == "admin":
+        user = ADMIN
+    elif PORTALS[slug].get("people"):
+        try:
+            user = next((u for u in load_users() if u["id"] == uid and u.get("active", True)), None)
+        except (OSError, ValueError):
+            user = None
+        if user is None:
+            return None
+    else:
+        return None
+    return user if hmac.compare_digest(sig, _sig(slug, uid, exp, user.get("sv", 0))) else None
 
 
 # ---------------- pages (the hub's look: Quilt navy, Geist, white cards) ----------------
@@ -115,7 +206,7 @@ form{width:100%;max-width:370px;background:var(--surface);border:1px solid var(-
 form::before{content:"";position:absolute;inset:0 0 auto;height:4px;background:linear-gradient(90deg,var(--q-sky) 0 50%,var(--q-plum) 50% 100%)}
 .brand{display:flex;align-items:center;gap:12px;margin-bottom:20px}
 .brand b{display:block;font-size:17px;font-weight:650;color:var(--q-navy)}.brand small{color:var(--muted);font-size:12.5px}
-label{display:block;font-size:13px;font-weight:600;margin:0 0 6px}
+label{display:block;font-size:13px;font-weight:600;margin:0 0 6px}input+label{margin-top:14px}
 input{width:100%;font:15px var(--font);color:var(--ink);padding:11px 12px;border:1px solid var(--line-strong);border-radius:9px}
 input:focus{outline:0;border-color:var(--q-sky);box-shadow:0 0 0 3px rgba(132,176,213,.32)}
 button{width:100%;margin-top:16px;font:600 15px var(--font);padding:11px;border:0;border-radius:9px;background:var(--q-navy);color:#fff;cursor:pointer;
@@ -126,11 +217,11 @@ button:hover{background:#0F1638}.err{color:var(--bad);font-size:13px;margin:12px
 </style></head><body><div>
 <form method="post" action="/__SLUG__/login">
 <div class="brand"><span class="qmark" aria-hidden="true">""" + MARK + """</span><div><b>__NAME__</b><small>Quilt Software · Sales Operations</small></div></div>
-<label for="pw">Password</label>
-<input id="pw" name="password" type="password" autocomplete="current-password" required autofocus>
+__EMAILFIELD__<label for="pw">Password</label>
+<input id="pw" name="password" type="password" autocomplete="current-password" required__PWFOCUS__>
 __ERROR__
 <button type="submit">Sign in</button>
-<p class="note">Stays signed in on this browser for 30 days, or until you sign out.</p>
+<p class="note">Stays signed in on this browser for 30 days, or until you sign out.__WHO__</p>
 </form><a class="back" href="/">← Back to the Sales Ops Hub</a></div></body></html>"""
 
 PAGE_STYLE = """<style>
@@ -171,7 +262,89 @@ footer{color:var(--faint);font-size:12px;padding-top:8px;border-top:1px solid va
 </style>"""
 
 
-def portal_page(slug: str) -> str:
+USERS_STYLE = """<style>
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px 22px;box-shadow:0 1px 2px rgba(20,26,56,.05)}
+table{width:100%;border-collapse:collapse;font-size:14px}th{text-align:left;font-size:11.5px;font-weight:600;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.06em;padding:8px 10px;border-bottom:1px solid var(--line)}td{padding:10px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr.off td{color:var(--faint)}.muted{color:var(--muted)}.acts{text-align:right;white-space:nowrap}
+.pill{display:inline-block;font-size:12px;font-weight:600;padding:2px 9px;border-radius:99px;background:#EEF2F9;color:var(--q-navy)}
+.pill.admin{background:var(--plum-soft);color:var(--q-plum)}
+.btn{display:inline-flex;align-items:center;gap:6px;font:600 13px var(--font);padding:7px 12px;border-radius:8px;border:1px solid var(--line-strong);
+  background:#fff;color:var(--q-navy);cursor:pointer;margin-left:6px}.btn:hover{background:#F7F8FB}
+.btn.primary{background:var(--q-navy);border-color:var(--q-navy);color:#fff}.btn.primary:hover{background:#0F1638}
+.btn.danger{color:#A3283F}.btn.danger:hover{background:#FCEEF1;border-color:#E8B9C3}
+form.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px 16px;align-items:end;margin-top:14px}
+form.grid label{display:grid;gap:5px;font-size:13px;font-weight:600}
+input,select{width:100%;font:14px var(--font);color:var(--ink);padding:9px 11px;border:1px solid var(--line-strong);border-radius:9px;background:#fff}
+input:focus,select:focus{outline:0;border-color:var(--q-sky);box-shadow:0 0 0 3px rgba(132,176,213,.32)}
+.mono{font-family:var(--mono)}.hint{color:var(--muted);font-size:13px;margin-top:8px}
+.msg{padding:10px 14px;border-radius:10px;background:#EEF2F9;color:var(--q-navy);font-size:14px}.msg.bad{background:#FCEEF1;color:#A3283F}
+.scroll{overflow-x:auto}
+</style>"""
+
+
+def shell(slug: str, user: dict, title: str, body: str, on: str) -> str:
+    """A signed-in portal page: the sidebar, then `body`."""
+    name = escape(PORTALS[slug]["name"])
+    others = "".join(f'<a href="{escape(v.get("link") or "/" + k)}">{svg("lock")}{escape(v["name"])}</a>'
+                     for k, v in PORTALS.items() if k != slug)
+    people = (f'<a class="{"on" if on == "users" else ""}" href="/{slug}/users">{svg("users")}Users</a>'
+              if PORTALS[slug].get("people") and user.get("role") == "admin" else "")
+    return (HEAD.replace("__TITLE__", f"{escape(title)} · Quilt Sales Ops") + PAGE_STYLE + USERS_STYLE + "</head><body>"
+            f'<header class="bar"><div class="bar-in">'
+            f'<a class="brand" href="/{slug}"><span class="qmark" aria-hidden="true">{MARK}</span><span><b>Quilt Software</b><small>{name}</small></span></a>'
+            f'<nav class="nav" aria-label="Portals"><a class="{"on" if on == "home" else ""}" href="/{slug}">{svg("lock")}{name}</a>{people}{others}'
+            f'<a href="/">{svg("back")}Sales Ops Hub</a><a href="/{slug}/logout">{svg("out")}Sign out</a></nav>'
+            f'<div class="bar-foot">Signed in as {escape(user.get("name") or "")}</div></div></header>'
+            f'<main>{body}<footer>Quilt Software · Sales Operations · Internal use only</footer></main></body></html>')
+
+
+def users_page(slug: str, me: dict, users: list, q: dict, msg: str = "", bad: bool = False) -> str:
+    edit, pw, add = q.get("edit", [""])[0], q.get("pw", [""])[0], q.get("add", [""])[0]
+    role = lambda r: f'<select name="role"><option value="member"{" selected" if r == "member" else ""}>Member</option><option value="admin"{" selected" if r == "admin" else ""}>Admin</option></select>'
+    rows = []
+    for u in sorted(users, key=lambda x: x["name"].lower()):
+        uid = escape(u["id"])
+        if edit == u["id"]:
+            rows.append(f'<tr><td colspan="5"><form class="grid" method="post" action="/{slug}/users"><input type="hidden" name="action" value="update">'
+                        f'<input type="hidden" name="id" value="{uid}"><label>Name<input name="name" value="{escape(u["name"])}" required></label>'
+                        f'<label>Email<input name="email" type="email" value="{escape(u["email"])}" required></label><label>Access{role(u["role"])}</label>'
+                        f'<label><span><input type="checkbox" name="active" value="1"{" checked" if u.get("active", True) else ""} style="width:auto"> Can sign in</span></label>'
+                        f'<div><button class="btn primary" type="submit">Save</button><a class="btn" href="/{slug}/users">Cancel</a></div></form></td></tr>')
+            continue
+        if pw == u["id"]:
+            rows.append(f'<tr><td colspan="5"><form class="grid" method="post" action="/{slug}/users"><input type="hidden" name="action" value="password">'
+                        f'<input type="hidden" name="id" value="{uid}"><label>New password for {escape(u["name"])}'
+                        f'<input class="mono" name="password" value="{make_password()}" required minlength="10" autocomplete="off"></label>'
+                        f'<div><button class="btn primary" type="submit">Set password</button><a class="btn" href="/{slug}/users">Cancel</a></div></form>'
+                        f'<p class="hint">Copy it before you save and send it to them yourself. This signs them out.</p></td></tr>')
+            continue
+        last = f'Signed in {escape(u["lastLogin"][:10])}' if u.get("lastLogin") else "Hasn’t signed in yet"
+        mine = u["id"] == me.get("id")
+        remove = "" if mine else (f'<form method="post" action="/{slug}/users" style="display:inline" onsubmit="return confirm(\'Remove this person from the Team Portal?\')">'
+                                  f'<input type="hidden" name="action" value="remove"><input type="hidden" name="id" value="{uid}">'
+                                  f'<button class="btn danger" type="submit">Remove</button></form>')
+        rows.append(f'<tr class="{"" if u.get("active", True) else "off"}"><td><b>{escape(u["name"])}</b>{" <span class=muted>(you)</span>" if mine else ""}</td>'
+                    f'<td>{escape(u["email"])}</td><td><span class="pill {escape(u["role"])}">{"Admin" if u["role"] == "admin" else "Member"}</span></td>'
+                    f'<td class="muted">{last if u.get("active", True) else "Can’t sign in"}</td>'
+                    f'<td class="acts"><a class="btn" href="/{slug}/users?edit={uid}">Edit</a><a class="btn" href="/{slug}/users?pw={uid}">Reset password</a>{remove}</td></tr>')
+    adder = (f'<form class="grid" method="post" action="/{slug}/users"><input type="hidden" name="action" value="add">'
+             f'<label>Name<input name="name" required autofocus></label><label>Work email<input name="email" type="email" required></label>'
+             f'<label>Access{role("member")}</label><label>Password<input class="mono" name="password" value="{make_password()}" required minlength="10" autocomplete="off"></label>'
+             f'<div><button class="btn primary" type="submit">Add person</button><a class="btn" href="/{slug}/users">Cancel</a></div></form>'
+             f'<p class="hint">Copy the password before you add them and send it yourself. They sign in at this portal with their email and it.</p>'
+             if add else f'<p style="margin-top:14px"><a class="btn primary" href="/{slug}/users?add=1" style="margin-left:0">+ Add a person</a></p>')
+    store = "" if KV_URL else ('<p class="msg bad">Storage isn’t connected, so people can’t be added yet. In Vercel: quilt-salesops-hub → Storage → '
+                               'Connect the Upstash database → Redeploy.</p>')
+    body = (f'<div class="hero"><h1>Users</h1><p>Who can open the {escape(PORTALS[slug]["name"])}. Everyone else can still use the hub. '
+            f'<b>Admin</b>: gets in and manages this list. <b>Member</b>: gets in. "admin" with the portal password always works too.</p></div>'
+            + (f'<p class="msg{" bad" if bad else ""}">{escape(msg)}</p>' if msg else "") + store
+            + f'<section class="card"><div class="scroll"><table><thead><tr><th>Name</th><th>Email</th><th>Access</th><th>Status</th><th></th></tr></thead>'
+            f'<tbody>{"".join(rows) or "<tr><td colspan=5 class=muted>No one yet. Add yourself first, as an Admin.</td></tr>"}</tbody></table></div>{adder}</section>')
+    return shell(slug, me, "Users", body, "users")
+
+
+def portal_page(slug: str, user: dict) -> str:
     p = PORTALS[slug]
     name = escape(p["name"])
     arrow = ('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" '
@@ -182,16 +355,9 @@ def portal_page(slug: str) -> str:
         f'<h3>{escape(a["title"])}</h3><p>{escape(a["desc"])}</p>'
         f'<div class="foot"><span class="host">{escape(urlsplit(a["url"]).netloc)}</span><span class="open">Open {arrow}</span></div></a>'
         for a in p["apps"])
-    others = "".join(f'<a href="/{k}">{svg("lock")}{escape(v["name"])}</a>' for k, v in PORTALS.items() if k != slug)
-    return (HEAD.replace("__TITLE__", f"{name} · Quilt Sales Ops") + PAGE_STYLE + "</head><body>"
-            f'<header class="bar"><div class="bar-in">'
-            f'<a class="brand" href="/{slug}"><span class="qmark" aria-hidden="true">{MARK}</span><span><b>Quilt Software</b><small>{name}</small></span></a>'
-            f'<nav class="nav" aria-label="Portals"><a class="on" href="/{slug}" aria-current="page">{svg("lock")}{name}</a>{others}'
-            f'<a href="/">{svg("back")}Sales Ops Hub</a><a href="/{slug}/logout">{svg("out")}Sign out</a></nav>'
-            f'<div class="bar-foot">Signed in · {name}</div></div></header>'
-            f'<main><div class="hero"><h1>{name}</h1><p>{escape(p["lede"])}</p></div>'
-            f'<section><div class="sec-h"><h2>{escape(p["section"])}</h2><p>Signed-in only</p></div><div class="apps">{cards}</div></section>'
-            f'<footer>Quilt Software · Sales Operations · Internal use only</footer></main></body></html>')
+    body = (f'<div class="hero"><h1>{name}</h1><p>{escape(p["lede"])}</p></div>'
+            f'<section><div class="sec-h"><h2>{escape(p["section"])}</h2><p>Signed-in only</p></div><div class="apps">{cards}</div></section>')
+    return shell(slug, user, p["name"], body, "home")
 
 
 class handler(BaseHTTPRequestHandler):
@@ -215,7 +381,8 @@ class handler(BaseHTTPRequestHandler):
     def route(self):
         """('portal' or 'commissions', 'login' / 'logout' / ''), or (None, None)."""
         parts = urlsplit(self.path).path.strip("/").split("/")
-        if parts[0] in PORTALS and len(parts) <= 2 and (len(parts) == 1 or parts[1] in ("login", "logout")):
+        sub = ("login", "logout", "users") if parts[0] in PORTALS and PORTALS[parts[0]].get("people") else ("login", "logout")
+        if parts[0] in PORTALS and len(parts) <= 2 and (len(parts) == 1 or parts[1] in sub):
             return parts[0], (parts[1] if len(parts) == 2 else "")
         return None, None
 
@@ -229,9 +396,22 @@ class handler(BaseHTTPRequestHandler):
     def cookie_header(self, slug: str, value: str, age: int) -> tuple:
         return ("Set-Cookie", f"{slug}_session={value}; Path=/{slug}; Max-Age={age}; HttpOnly; Secure; SameSite=Lax")
 
-    def login_page(self, slug: str, code=HTTPStatus.OK, error: str = ""):
+    def login_page(self, slug: str, code=HTTPStatus.OK, error: str = "", email: str = ""):
+        people = PORTALS[slug].get("people")
         page = LOGIN.replace("__NAME__", escape(PORTALS[slug]["name"])).replace("__SLUG__", slug)
+        page = page.replace("__EMAILFIELD__", f'<label for="em">Email</label><input id="em" name="email" type="text" inputmode="email" '
+                                              f'autocomplete="username" autocapitalize="off" spellcheck="false" required autofocus value="{escape(email)}">'
+                            if people else "")
+        page = page.replace("__PWFOCUS__", "" if people else " autofocus")
+        page = page.replace("__WHO__", " No login yet? Ask Mary." if people else "")
         self.send(code, page.replace("__ERROR__", f'<p class="err" role="alert">{escape(error)}</p>' if error else ""))
+
+    def form(self) -> dict:
+        n = int(self.headers.get("Content-Length") or 0)
+        return parse_qs(self.read_body(min(n, 16384)).decode("utf-8", "replace")) if n > 0 else {}
+
+    def read_body(self, n: int) -> bytes:
+        return self.rfile.read(n)
 
     def do_GET(self):
         slug, page = self.route()
@@ -239,26 +419,101 @@ class handler(BaseHTTPRequestHandler):
             return self.send(HTTPStatus.NOT_FOUND, "Not found.")
         if page == "logout":
             return self.send(HTTPStatus.SEE_OTHER, "", [("Location", f"/{slug}/login"), self.cookie_header(slug, "", 0)])
-        signed_in = session_ok(slug, self.cookie(slug))
+        user = session_user(slug, self.cookie(slug))
         if page == "login":
-            return self.send(HTTPStatus.SEE_OTHER, "", [("Location", f"/{slug}")]) if signed_in else self.login_page(slug)
-        if signed_in:
-            return self.send(HTTPStatus.OK, portal_page(slug))
-        self.send(HTTPStatus.SEE_OTHER, "", [("Location", f"/{slug}/login")])
+            return self.send(HTTPStatus.SEE_OTHER, "", [("Location", f"/{slug}")]) if user else self.login_page(slug)
+        if not user:
+            return self.send(HTTPStatus.SEE_OTHER, "", [("Location", f"/{slug}/login")])
+        if page == "users":
+            if user.get("role") != "admin":
+                return self.send(HTTPStatus.SEE_OTHER, "", [("Location", f"/{slug}")])
+            q = parse_qs(urlsplit(self.path).query)
+            try:
+                users = load_users()
+            except (OSError, ValueError):
+                return self.send(HTTPStatus.OK, users_page(slug, user, [], {}, "Couldn't reach the user list. Try again in a minute.", True))
+            return self.send(HTTPStatus.OK, users_page(slug, user, users, q, q.get("msg", [""])[0]))
+        self.send(HTTPStatus.OK, portal_page(slug, user))
 
     def do_POST(self):
         slug, page = self.route()
+        if slug and page == "users":
+            return self.post_users(slug)
         if not slug or page != "login":
             return self.send(HTTPStatus.NOT_FOUND, "Not found.")
         p = PORTALS[slug]
         if not password(slug):
             return self.login_page(slug, HTTPStatus.SERVICE_UNAVAILABLE,
                                    f"The {p['name']} is closed until a password is set ({p['env']} in Vercel).")
-        n = int(self.headers.get("Content-Length") or 0)
-        form = parse_qs(self.rfile.read(min(n, 4096)).decode("utf-8", "replace")) if n > 0 else {}
+        form = self.form()
         pw = (form.get("password") or [""])[0]
-        if not hmac.compare_digest(pw.encode("utf-8"), password(slug).encode("utf-8")):
+        email = (form.get("email") or [""])[0].strip().lower()
+        user = None
+        if not p.get("people") or email in ("", "admin"):
+            if hmac.compare_digest(pw.encode("utf-8"), password(slug).encode("utf-8")):
+                user = ADMIN
+        else:
+            try:
+                users = load_users()
+                found = next((u for u in users if u["email"] == email and u.get("active", True)), None)
+                if found and check_password(pw, found.get("pw", "")):
+                    user = found
+                    found["lastLogin"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+                    save_users(users)
+            except (OSError, ValueError):
+                pass
+        if user is None:
             time.sleep(1)                        # slows guessing
-            return self.login_page(slug, HTTPStatus.UNAUTHORIZED, "That password isn't right.")
+            msg = "That email and password don't match." if p.get("people") else "That password isn't right."
+            return self.login_page(slug, HTTPStatus.UNAUTHORIZED, msg, email)
         self.send(HTTPStatus.SEE_OTHER, "", [("Location", f"/{slug}"),
-                                             self.cookie_header(slug, make_session(slug), DAYS * 86400)])
+                                             self.cookie_header(slug, make_session(slug, user), DAYS * 86400)])
+
+    def post_users(self, slug: str):
+        """Admins add, change, reset and remove Team Portal people (/portal/users forms)."""
+        me = session_user(slug, self.cookie(slug))
+        form = self.form()
+        if not me or me.get("role") != "admin":
+            return self.send(HTTPStatus.SEE_OTHER, "", [("Location", f"/{slug}/login")])
+        f = lambda k: (form.get(k) or [""])[0].strip()
+        back = lambda msg: self.send(HTTPStatus.SEE_OTHER, "", [("Location", f"/{slug}/users?msg={quote(msg)}")])
+        try:
+            users = load_users()
+        except (OSError, ValueError):
+            return back("Couldn't reach the user list. Try again in a minute.")
+        action, target = f("action"), next((u for u in users if u["id"] == f("id")), None)
+        name, email, role, pw = f("name")[:80], f("email").lower()[:120], f("role"), (form.get("password") or [""])[0]
+        if action != "add" and target is None:
+            return back("That person isn't in the list any more.")
+        if action in ("add", "update"):
+            if not name or not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", email) or role not in ("admin", "member"):
+                return back("Add a name, a work email and their access.")
+            if any(u["email"] == email and u is not target for u in users):
+                return back(f"{email} already has a login.")
+        if action in ("add", "password") and len(pw) < 10:
+            return back("Passwords need at least 10 characters.")
+        if target is not None and target["id"] == me["id"] and (action == "remove" or (action == "update" and (role != "admin" or not f("active")))):
+            return back("You can't take away your own admin access.")
+        if action == "add":
+            users.append({"id": secrets.token_hex(6), "name": name, "email": email, "role": role, "active": True,
+                          "pw": hash_password(pw), "sv": 1, "created": time.strftime("%Y-%m-%d", time.gmtime())})
+            done = f"Added {name}. Send them their password."
+        elif action == "update":
+            changed = target["role"] != role or (target.get("active", True) and not f("active"))
+            target.update(name=name, email=email, role=role, active=bool(f("active")))
+            if changed:
+                target["sv"] = target.get("sv", 0) + 1
+            done = f"Saved {name}."
+        elif action == "password":
+            target["pw"], target["sv"] = hash_password(pw), target.get("sv", 0) + 1
+            done = f"New password set for {target['name']}. Send it to them."
+        elif action == "remove":
+            users = [u for u in users if u is not target]
+            done = f"{target['name']} can't open the portal any more."
+        else:
+            return back("Bad request.")
+        try:
+            save_users(users)
+        except (OSError, ValueError):
+            return back("Couldn't save just now. Try again in a minute.")
+        return back(done)
