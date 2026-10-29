@@ -136,7 +136,7 @@ footer .qmark { width: 12px; height: 18px; }
 
 /* collapsible groups */
 .grp { border: 1px solid var(--line); border-radius: 14px; background: var(--surface); box-shadow: 0 1px 2px rgba(20, 26, 56, .04); }
-.grp + .grp { margin-top: 14px; }
+.grp + .grp { margin-top: -26px; }   /* #sections' 38px gap, less: groups sit 12px apart */
 .sec-toggle { all: unset; box-sizing: border-box; width: 100%; display: flex; align-items: center; gap: 14px; padding: 16px 20px; cursor: pointer; border-radius: 14px; }
 .sec-toggle:hover { background: var(--surface-2, #F9FAFB); }
 .sec-toggle:focus-visible { outline: 2px solid var(--q-sky); outline-offset: 2px; }
@@ -253,20 +253,27 @@ function rowCard(it) {
     ? `<a class="chan" href="${esc(it.url)}" target="_blank" rel="noopener">${inner}${arrow('go')}</a>`
     : `<div class="chan pending">${inner}<span class="soon">Coming soon</span></div>`;
 }
-// which groups are collapsed, remembered on this browser
-let closed = new Set();
-try { closed = new Set(JSON.parse(localStorage.getItem('hub.closed') || '[]')); } catch (e) { /* private mode */ }
-const keepClosed = () => { try { localStorage.setItem('hub.closed', JSON.stringify([...closed])); } catch (e) { /* private mode */ } };
+// which groups are open (they start collapsed), remembered on this browser
+let opened = new Set();
+try { opened = new Set(JSON.parse(localStorage.getItem('hub.opened') || '[]')); } catch (e) { /* private mode */ }
+const keepOpened = () => { try { localStorage.setItem('hub.opened', JSON.stringify([...opened])); } catch (e) { /* private mode */ } };
+
+// Apps come first as cards, as they always have; every link, apps included,
+// also sits in its topic group below, collapsed until opened.
+const APPS = { id: 'apps', name: 'Apps', icon: 'apps', note: 'Our tools. Each has its own sign-in.' };
+const asRow = it => (it.icon ? { ...it, ini: it.title.split(/\s+/).map(w => w[0]).join('').slice(0, 3).toUpperCase() } : it);
 
 function render() {
-  const out = SECTIONS.map(s => {
+  const apps = SECTIONS.flatMap(s => s.items).filter(it => it.icon).filter(matches);
+  const appsHtml = query && !apps.length ? '' : `<section id="apps" aria-labelledby="h-apps">
+    <div class="sec-h"><h2 id="h-apps">${esc(APPS.name)}</h2><p>${esc(APPS.note)}</p></div>
+    ${apps.length ? `<div class="apps">${apps.map(appCard).join('')}</div>` : '<div class="empty">No apps yet.</div>'}</section>`;
+  const out = appsHtml + SECTIONS.map(s => {
     const items = s.items.filter(matches);
     if (query && !items.length) return '';
-    const open = query ? true : !closed.has(s.id);      // a search opens every group with a match
-    const apps = items.filter(it => it.icon), rows = items.filter(it => !it.icon);
+    const open = query ? true : opened.has(s.id);       // a search opens every group with a match
     const body = !items.length ? `<div class="empty">Nothing in ${esc(s.name)} yet.</div>`
-      : (apps.length ? `<div class="apps">${apps.map(appCard).join('')}</div>` : '')
-        + (rows.length ? `<div class="chans">${rows.map(rowCard).join('')}</div>` : '');
+      : `<div class="chans">${items.map(asRow).map(rowCard).join('')}</div>`;
     return `<section id="${s.id}" class="grp${open ? ' is-open' : ''}" aria-labelledby="h-${s.id}">
       <button class="sec-h sec-toggle" type="button" data-group="${s.id}" aria-expanded="${open}" aria-controls="b-${s.id}">
         <span class="sec-ic">${svg(s.icon)}</span><span class="sec-t"><h2 id="h-${s.id}">${esc(s.name)}</h2><p>${esc(s.note)}</p></span>
@@ -274,7 +281,7 @@ function render() {
       <div class="sec-b" id="b-${s.id}"${open ? '' : ' hidden'}>${body}</div></section>`;
   }).join('');
   document.getElementById('sections').innerHTML = out || `<div class="empty">Nothing matches “${esc(query)}”.</div>`;
-  document.getElementById('nav').innerHTML = SECTIONS.map(s =>
+  document.getElementById('nav').innerHTML = [{ ...APPS, items: apps }, ...SECTIONS].map(s =>
     `<a href="#${s.id}" data-id="${s.id}">${svg(s.icon)}${esc(s.short || s.name)}<span class="n">${s.items.filter(matches).length}</span></a>`).join('');
   watch();
 }
@@ -297,14 +304,14 @@ document.getElementById('sections').addEventListener('click', e => {
   const b = e.target.closest('.sec-toggle');
   if (!b || query) return;
   const id = b.dataset.group;
-  if (closed.has(id)) closed.delete(id); else closed.add(id);
-  keepClosed();
+  if (opened.has(id)) opened.delete(id); else opened.add(id);
+  keepOpened();
   render();
 });
 // a sidebar link opens its group
 document.getElementById('nav').addEventListener('click', e => {
   const a = e.target.closest('a[data-id]');
-  if (a && closed.has(a.dataset.id)) { closed.delete(a.dataset.id); keepClosed(); render(); }
+  if (a && a.dataset.id !== 'apps' && !opened.has(a.dataset.id)) { opened.add(a.dataset.id); keepOpened(); render(); }
 });
 
 const q = document.getElementById('q');
