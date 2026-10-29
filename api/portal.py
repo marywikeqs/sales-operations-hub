@@ -7,8 +7,8 @@ but not everyone should access the team portal"): each signs in with their
 email and a password an admin sets at /portal/users. The list lives in the
 Upstash database connected to the hub project (key hub:users; no names in this
 public repo). "admin" with PORTAL_PASSWORD always works, so nobody is locked
-out. The Commission Portal keeps its one password (COMMISSION_PASSWORD); the
-hub's sidebar now links straight to the Commission Plan Builder's own sign-in.
+out. The Commission Portal is the Commission Plan Builder's own sign-in (email +
+password): /commissions and its old pages forward there.
 
 Vercel sends /<portal>, /<portal>/login, /logout and /portal/users here
 (vercel.json). A signed cookie keeps people in for 30 days. Changing someone's
@@ -417,6 +417,8 @@ class handler(BaseHTTPRequestHandler):
         slug, page = self.route()
         if not slug:
             return self.send(HTTPStatus.NOT_FOUND, "Not found.")
+        if PORTALS[slug].get("link"):           # the Commission Portal is the app's own sign-in now
+            return self.send(HTTPStatus.SEE_OTHER, "", [("Location", PORTALS[slug]["link"])])
         if page == "logout":
             return self.send(HTTPStatus.SEE_OTHER, "", [("Location", f"/{slug}/login"), self.cookie_header(slug, "", 0)])
         user = session_user(slug, self.cookie(slug))
@@ -439,6 +441,8 @@ class handler(BaseHTTPRequestHandler):
         slug, page = self.route()
         if slug and page == "users":
             return self.post_users(slug)
+        if slug and PORTALS[slug].get("link"):
+            return self.send(HTTPStatus.SEE_OTHER, "", [("Location", PORTALS[slug]["link"])])
         if not slug or page != "login":
             return self.send(HTTPStatus.NOT_FOUND, "Not found.")
         p = PORTALS[slug]
