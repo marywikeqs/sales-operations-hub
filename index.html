@@ -150,13 +150,39 @@ footer .qmark { width: 12px; height: 18px; }
 .grp.is-open .sec-toggle .caret { transform: rotate(90deg); }
 .sec-b { padding: 0 20px 20px; display: grid; gap: 14px; }
 @media (prefers-reduced-motion: reduce) { .sec-toggle .caret { transition: none; } }
+
+/* pages: sidebar Apps -> topics; a page per topic */
+.nav-apps { all: unset; box-sizing: border-box; display: flex; align-items: center; gap: 9px; width: 100%; padding: 8px 10px; border-radius: 7px; color: #C2CCE3; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.nav-apps:hover { background: rgba(255, 255, 255, .07); color: #fff; }
+.nav-apps.on { background: rgba(255, 255, 255, .12); color: #fff; box-shadow: inset 3px 0 0 var(--q-sky); }
+.nav-apps:focus-visible { outline: 2px solid var(--q-sky); outline-offset: 2px; }
+.nav-apps .caret { margin-left: auto; width: 15px; height: 15px; transition: transform .15s; }
+.nav-apps[aria-expanded="true"] .caret { transform: rotate(90deg); }
+.nav-sub { display: grid; gap: 2px; }
+.nav-sub a { padding-left: 22px !important; }
+.crumbs { margin: 0; font-size: 13px; color: var(--muted); }
+.crumbs a { color: var(--q-navy); font-weight: 600; }
+.crumbs a:hover { text-decoration: underline; }
+.topics { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 12px; }
+.topic { display: flex; align-items: flex-start; gap: 14px; padding: 18px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(20, 26, 56, .05); transition: border-color .15s, box-shadow .15s, transform .15s; }
+.topic:hover { border-color: #C9CFDB; transform: translateY(-1px); box-shadow: 0 2px 4px rgba(20, 26, 56, .05), 0 12px 28px -14px rgba(24, 33, 78, .28); }
+.topic-t { flex: 1; min-width: 0; display: grid; gap: 4px; }
+.topic-t b { font-size: 16px; color: var(--q-navy); }
+.topic-t span { font-size: 13.5px; color: var(--muted); }
+.topic-t small { font-size: 12px; color: var(--faint); }
+.topic .go { flex: none; width: 16px; height: 16px; color: var(--faint); margin-top: 4px; transition: transform .15s; }
+.topic:hover .go { transform: translateX(3px); }
+.sec-h h2 a:hover { text-decoration: underline; }
+.apps + .chans { margin-top: 14px; }
+@media (max-width: 999px) { .nav-sub { display: flex; } .nav-sub[hidden] { display: none; } .nav-sub a { padding-left: 11px !important; } .nav-apps { width: auto; } }
 </style>
 </head>
 <body>
 
 <header class="bar">
   <div class="bar-in">
-    <a class="brand" href="#top" aria-label="Quilt Sales Ops Hub, back to top">
+    <a class="brand" href="#/" aria-label="Quilt Sales Ops Hub, Apps">
       <span class="qmark" aria-hidden="true"><svg viewBox="4 0 32 48"><path d="M20 2 34 16 20 30 6 16z" fill="#84B0D5"/><path d="M20 18 34 32 20 46 6 32z" fill="#8F568F"/><path d="M20 18 26 24 20 30 14 24z" fill="#18214E"/></svg></span>
       <span><b>Quilt Software</b><small>Sales Ops Hub</small></span>
     </a>
@@ -168,8 +194,9 @@ footer .qmark { width: 12px; height: 18px; }
 
 <main id="top">
   <div class="hero">
-    <h1>Sales Operations</h1>
-    <p class="lede">Everything you need from Sales Operations, in one place: Salesforce requests, pricing, sales documents, reporting and the forms to get things done.</p>
+    <p class="crumbs" id="crumbs" hidden></p>
+    <h1 id="heroTitle">Sales Operations</h1>
+    <p class="lede" id="heroLede">Everything you need from Sales Operations, in one place: Salesforce requests, pricing, sales documents, reporting and the forms to get things done.</p>
     <label class="search">
       <svg class="mag" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       <input type="search" id="q" placeholder="Search apps and help" autocomplete="off" aria-label="Search the hub">
@@ -203,20 +230,20 @@ const ICONS = {
 // with an icon shows as an app card, one with initials as a row. Each group
 // collapses; the choice is remembered on this browser.
 const SECTIONS = [
-  { id: 'salesforce', name: 'Salesforce', icon: 'cloud', note: 'Requests, projects and access for Salesforce.', items: [
+  { id: 'salesforce', name: 'Salesforce', about: 'Everything to do with Salesforce. Submit a change request (BRD) and follow it from intake to Go Live: the board, sprint plans, requirement and UAT sign-offs, and status updates. Get set up in Salesforce and our other sales tools, or request access and user changes.',  icon: 'cloud', note: 'Requests, projects and access for Salesforce.', items: [
     { title: 'BRD Hub', desc: 'Submit a Salesforce BRD and follow it from intake to Go Live: board, sprints, sign-offs and UAT.', icon: 'board', url: 'https://brd-hub.vercel.app/', tag: 'Salesforce' },
     { title: 'Systems & Access', desc: 'Salesforce, tool onboarding and user management.', ini: 'SA', url: 'https://systems-access-hub-production.up.railway.app/' },
   ]},
-  { id: 'pricing', name: 'Pricing & Deals', icon: 'tag', note: 'What to charge and how to discount.', items: [
+  { id: 'pricing', name: 'Pricing & Deals', about: 'How we price and discount. Current rate cards, discount structures and the guidance for quoting a deal.',  icon: 'tag', note: 'What to charge and how to discount.', items: [
     { title: 'Pricing & Discounting', desc: 'Rate cards, discount structures and pricing strategies.', ini: 'PD', url: 'https://pricing-hub-production-2481.up.railway.app/' },
   ]},
-  { id: 'docs', name: 'Sales Documents & Enablement', short: 'Sales Documents', icon: 'doc', note: 'Rules, playbooks and guides.', items: [
+  { id: 'docs', name: 'Sales Documents & Enablement', about: 'The rules and guides for selling at Quilt: bookings rules, playbooks, process guides and enablement materials.',  short: 'Sales Documents', icon: 'doc', note: 'Rules, playbooks and guides.', items: [
     { title: 'Sales Documents', desc: 'Bookings rules, playbooks, guides and enablement materials.', ini: 'SD', url: 'https://sales-documents-hub-production.up.railway.app/' },
   ]},
-  { id: 'reporting', name: 'Reporting', icon: 'chart', note: 'Dashboards, reports and data.', items: [
+  { id: 'reporting', name: 'Reporting', about: 'Dashboards and reports on sales performance, and how to get data or access to a report.',  icon: 'chart', note: 'Dashboards, reports and data.', items: [
     { title: 'Reporting & Analytics', desc: 'Dashboards, reports and data access.', ini: 'RA', url: 'https://sales-reporting-hub.up.railway.app/' },
   ]},
-  { id: 'requests', name: 'Requests & Team', icon: 'help', note: 'Forms, questions and team tools.', items: [
+  { id: 'requests', name: 'Requests & Team', about: 'Forms and requests for Sales Operations: personnel changes for sales team members, general questions or special requests, and internal team tools.',  icon: 'help', note: 'Forms, questions and team tools.', items: [
     { title: 'Personnel Change Form', desc: 'Submit a personnel change notice for sales team members.', ini: 'PC', url: 'https://personnel-notice-form-production-b723.up.railway.app/' },
     { title: 'Ask Sales Ops', desc: 'General questions or special requests.', ini: 'ASO', url: '' },
     { title: 'Internal Team Tools', desc: 'Internal tools and resources.', ini: 'IT', url: 'https://internal-team-tools-production.up.railway.app/' },
@@ -253,65 +280,59 @@ function rowCard(it) {
     ? `<a class="chan" href="${esc(it.url)}" target="_blank" rel="noopener">${inner}${arrow('go')}</a>`
     : `<div class="chan pending">${inner}<span class="soon">Coming soon</span></div>`;
 }
-// which groups are open (they start collapsed), remembered on this browser
-let opened = new Set();
-try { opened = new Set(JSON.parse(localStorage.getItem('hub.opened') || '[]')); } catch (e) { /* private mode */ }
-const keepOpened = () => { try { localStorage.setItem('hub.opened', JSON.stringify([...opened])); } catch (e) { /* private mode */ } };
-
-// Apps come first as cards, as they always have; every link, apps included,
-// also sits in its topic group below, collapsed until opened.
-const APPS = { id: 'apps', name: 'Apps', icon: 'apps', note: 'Our tools. Each has its own sign-in.' };
+// ---- pages: #/ is Apps (every topic), #/<topic> is that topic's own page ----
+const APPS = { id: 'apps', name: 'Apps', icon: 'apps' };
+const HOME_LEDE = document.getElementById('heroLede').textContent;
 const asRow = it => (it.icon ? { ...it, ini: it.title.split(/\s+/).map(w => w[0]).join('').slice(0, 3).toUpperCase() } : it);
+const route = () => (location.hash.replace(/^#\/?/, '') || 'apps');
+const topic = id => SECTIONS.find(s => s.id === id);
+
+// the sidebar's Apps list opens and closes; remembered on this browser
+let appsOpen = true;
+try { appsOpen = localStorage.getItem('hub.appsOpen') !== '0'; } catch (e) { /* private mode */ }
+
+function links(items) {
+  const apps = items.filter(it => it.icon), rows = items.filter(it => !it.icon);
+  return (apps.length ? `<div class="apps">${apps.map(appCard).join('')}</div>` : '')
+    + (rows.length ? `<div class="chans">${rows.map(rowCard).join('')}</div>` : '');
+}
 
 function render() {
-  const apps = SECTIONS.flatMap(s => s.items).filter(it => it.icon).filter(matches);
-  const appsHtml = query && !apps.length ? '' : `<section id="apps" aria-labelledby="h-apps">
-    <div class="sec-h"><h2 id="h-apps">${esc(APPS.name)}</h2><p>${esc(APPS.note)}</p></div>
-    ${apps.length ? `<div class="apps">${apps.map(appCard).join('')}</div>` : '<div class="empty">No apps yet.</div>'}</section>`;
-  const out = appsHtml + SECTIONS.map(s => {
-    const items = s.items.filter(matches);
-    if (query && !items.length) return '';
-    const open = query ? true : opened.has(s.id);       // a search opens every group with a match
-    const body = !items.length ? `<div class="empty">Nothing in ${esc(s.name)} yet.</div>`
-      : `<div class="chans">${items.map(asRow).map(rowCard).join('')}</div>`;
-    return `<section id="${s.id}" class="grp${open ? ' is-open' : ''}" aria-labelledby="h-${s.id}">
-      <button class="sec-h sec-toggle" type="button" data-group="${s.id}" aria-expanded="${open}" aria-controls="b-${s.id}">
-        <span class="sec-ic">${svg(s.icon)}</span><span class="sec-t"><h2 id="h-${s.id}">${esc(s.name)}</h2><p>${esc(s.note)}</p></span>
-        <span class="sec-n">${items.length}</span>${svg('caret', 'ti caret')}</button>
-      <div class="sec-b" id="b-${s.id}"${open ? '' : ' hidden'}>${body}</div></section>`;
-  }).join('');
-  document.getElementById('sections').innerHTML = out || `<div class="empty">Nothing matches “${esc(query)}”.</div>`;
-  document.getElementById('nav').innerHTML = [{ ...APPS, items: apps }, ...SECTIONS].map(s =>
-    `<a href="#${s.id}" data-id="${s.id}">${svg(s.icon)}${esc(s.short || s.name)}<span class="n">${s.items.filter(matches).length}</span></a>`).join('');
-  watch();
+  const here = topic(route()) ? route() : 'apps';
+  const t = topic(here);
+  document.getElementById('crumbs').hidden = !t;
+  document.getElementById('crumbs').innerHTML = t ? `<a href="#/">Apps</a> <span aria-hidden="true">›</span> ${esc(t.name)}` : '';
+  document.getElementById('heroTitle').textContent = t ? t.name : 'Sales Operations';
+  document.getElementById('heroLede').textContent = t ? t.about : HOME_LEDE;
+  document.title = t ? `${t.name} · Quilt Sales Ops Hub` : 'Quilt Sales Ops Hub';
+  let out;
+  if (query) {                                    // search: every topic, matches only
+    out = SECTIONS.map(s => {
+      const items = s.items.filter(matches);
+      return items.length ? `<section><div class="sec-h"><h2><a href="#/${s.id}">${esc(s.name)}</a></h2><p>${items.length} match${items.length === 1 ? '' : 'es'}</p></div>${links(items)}</section>` : '';
+    }).join('') || `<div class="empty">Nothing matches “${esc(query)}”.</div>`;
+  } else if (t) {                                 // a topic's own page
+    out = `<section id="${t.id}">${t.items.length ? links(t.items) : `<div class="empty">Nothing in ${esc(t.name)} yet.</div>`}</section>`;
+  } else {                                        // Apps: a tile per topic
+    out = `<section id="apps"><div class="sec-h"><h2>Apps</h2><p>Pick a topic</p></div><div class="topics">${SECTIONS.map(s => `
+      <a class="topic" href="#/${s.id}"><span class="sec-ic">${svg(s.icon)}</span>
+        <span class="topic-t"><b>${esc(s.name)}</b><span>${esc(s.about)}</span>
+        <small>${s.items.map(it => esc(it.title)).join(' · ')}</small></span>${arrow('go')}</a>`).join('')}</div></section>`;
+  }
+  document.getElementById('sections').innerHTML = out;
+  document.getElementById('nav').innerHTML = `
+    <button type="button" class="nav-apps${here === 'apps' && !query ? ' on' : ''}" id="navApps" aria-expanded="${appsOpen}">${svg('apps')}Apps${svg('caret', 'ti caret')}</button>
+    <div class="nav-sub" id="navSub"${appsOpen ? '' : ' hidden'}>${SECTIONS.map(s =>
+      `<a href="#/${s.id}" class="${here === s.id && !query ? 'on' : ''}"${here === s.id ? ' aria-current="page"' : ''}>${svg(s.icon)}${esc(s.short || s.name)}<span class="n">${s.items.filter(matches).length}</span></a>`).join('')}</div>`;
 }
 
-// the sidebar follows the section in view
-let observer;
-function watch() {
-  observer?.disconnect();
-  const links = [...document.querySelectorAll('#nav a')];
-  const mark = id => links.forEach(a => a.classList.toggle('on', a.dataset.id === id));
-  mark((document.querySelector('#sections section') || {}).id);
-  observer = new IntersectionObserver(es => {
-    const vis = es.filter(e => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
-    if (vis) mark(vis.target.id);
-  }, { rootMargin: '-90px 0px -55% 0px' });
-  document.querySelectorAll('#sections section').forEach(s => observer.observe(s));
-}
-
-document.getElementById('sections').addEventListener('click', e => {
-  const b = e.target.closest('.sec-toggle');
-  if (!b || query) return;
-  const id = b.dataset.group;
-  if (opened.has(id)) opened.delete(id); else opened.add(id);
-  keepOpened();
-  render();
-});
-// a sidebar link opens its group
+addEventListener('hashchange', () => { if (query) { q.value = ''; query = ''; } render(); scrollTo(0, 0); });
 document.getElementById('nav').addEventListener('click', e => {
-  const a = e.target.closest('a[data-id]');
-  if (a && a.dataset.id !== 'apps' && !opened.has(a.dataset.id)) { opened.add(a.dataset.id); keepOpened(); render(); }
+  if (!e.target.closest('#navApps')) return;
+  appsOpen = !appsOpen;
+  try { localStorage.setItem('hub.appsOpen', appsOpen ? '1' : '0'); } catch (err) { /* private mode */ }
+  if (route() !== 'apps') location.hash = '#/';
+  render();
 });
 
 const q = document.getElementById('q');
