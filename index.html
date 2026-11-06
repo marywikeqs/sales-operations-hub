@@ -28,6 +28,19 @@ html { background: var(--bg); }
 body { margin: 0; background: var(--bg); color: var(--ink); font: 14.5px/1.55 var(--font); -webkit-font-smoothing: antialiased; }
 a { color: inherit; text-decoration: none; }
 [hidden] { display: none !important; }
+/* "New app" banner (2026-11-06): apps that went live in the last three weeks, from Weekly Progress. Each can be dismissed. */
+.launch { display: flex; gap: 14px; align-items: center; background: linear-gradient(120deg, var(--q-navy) 0%, #2B2F6B 55%, var(--q-plum) 100%); color: #fff;
+  border-radius: var(--r); padding: 14px 18px; margin: 0 0 18px; box-shadow: 0 6px 20px rgba(24,33,78,.18); }
+.launch .rk { font-size: 24px; line-height: 1; flex: none; }
+.launch .lt { flex: 1; min-width: 0; }
+.launch .lt small { display: block; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #C9D8EE; }
+.launch .lt b { display: block; font-size: 17px; letter-spacing: -.01em; }
+.launch .lt span { display: block; font-size: 13.5px; color: #DCE5F3; }
+.launch .go { flex: none; background: #fff; color: var(--q-navy); font-weight: 650; font-size: 13.5px; padding: 7px 14px; border-radius: 8px; }
+.launch .go:hover { background: var(--sky-soft); }
+.launch .x { flex: none; border: 0; background: none; color: #C9D8EE; font-size: 20px; line-height: 1; cursor: pointer; padding: 2px 6px; border-radius: 6px; }
+.launch .x:hover { background: rgba(255,255,255,.12); color: #fff; }
+@media (max-width: 700px) { .launch { flex-wrap: wrap; } .launch .go { order: 3; } }
 :focus-visible { outline: 2px solid var(--q-sky); outline-offset: 2px; border-radius: 6px; }
 h1, h2, h3 { margin: 0; line-height: 1.2; letter-spacing: -.015em; }
 p { margin: 0; }
@@ -193,6 +206,7 @@ footer .qmark { width: 12px; height: 18px; }
 </header>
 
 <main id="top">
+  <div id="launches"></div>
   <div class="hero">
     <p class="crumbs" id="crumbs" hidden></p>
     <h1 id="heroTitle">Sales Operations</h1>
@@ -330,6 +344,28 @@ addEventListener('keydown', e => {
 });
 document.getElementById('yr').textContent = new Date().getFullYear();
 render();
+
+// ---- "New app" banner: what Weekly Progress says went live lately (apps marked "Added to the Sales Hub") ----
+(async () => {
+  const box = document.getElementById('launches');
+  let seen = [];
+  try { seen = JSON.parse(localStorage.getItem('hub-launch-seen') || '[]'); } catch (e) {}
+  let list = [];
+  try {
+    const r = await fetch('https://internal-team-weeklyprogress.vercel.app/api/public/launches', {cache: 'no-store'});
+    list = (await r.json()).launches || [];
+  } catch (e) { return; }           // no banner if it can't be reached
+  const draw = () => {
+    const xs = list.filter(a => !seen.includes(a.id + a.liveSince));
+    const day = d => new Date(d + 'T12:00').toLocaleDateString(undefined, {month: 'short', day: 'numeric'});
+    box.innerHTML = xs.map(a => `<div class="launch" role="status"><span class="rk" aria-hidden="true">🚀</span>
+      <div class="lt"><small>New app · live ${esc(day(a.liveSince))}</small><b>${esc(a.title)}</b>${a.blurb ? `<span>${esc(a.blurb)}</span>` : ''}</div>
+      ${a.link ? `<a class="go" href="${esc(a.link)}" target="_blank" rel="noopener">Open it ↗</a>` : ''}
+      <button type="button" class="x" data-k="${esc(a.id + a.liveSince)}" aria-label="Dismiss">×</button></div>`).join('');
+    box.querySelectorAll('.x').forEach(b => b.onclick = () => { seen.push(b.dataset.k); localStorage.setItem('hub-launch-seen', JSON.stringify(seen.slice(-50))); draw(); });
+  };
+  draw();
+})();
 </script>
 </body>
 </html>
