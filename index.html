@@ -90,6 +90,9 @@ p { margin: 0; }
 .portal-link { display: inline-flex; align-items: center; gap: 9px; padding: 7px 11px; border-radius: 7px; color: #fff; font-weight: 500; border: 1px solid rgba(255, 255, 255, .22); white-space: nowrap; }
 .portal-link:hover { background: rgba(255, 255, 255, .08); }
 .portal-link .ti { width: 16px; height: 16px; }
+button.portal-link { font: inherit; background: none; cursor: pointer; text-align: left; }
+.portal-link.ask-side { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.3); }
+.portal-link.ask-side:hover { background: rgba(255,255,255,.16); }
 
 @media (min-width: 1000px) {
   body { display: grid; grid-template-columns: 236px minmax(0, 1fr); align-items: start; }
@@ -226,7 +229,8 @@ footer .qmark { width: 12px; height: 18px; }
       <span><b>Quilt Software</b><small>Sales Ops Hub</small></span>
     </a>
     <nav class="nav" id="nav" aria-label="Sections"></nav>
-    <a class="portal-link first" href="/portal"><svg class="ti" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg>Team Portal</a>
+    <button type="button" class="portal-link first ask-side" id="askOpen"><svg class="ti" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.4 1 1.1 1 1.8V16h5v-.3c0-.7.4-1.4 1-1.8A6 6 0 0 0 12 3z"/></svg>Request a feature or app</button>
+    <a class="portal-link" href="/portal"><svg class="ti" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg>Team Portal</a>
     <div class="bar-foot"><b>Sales Operations</b><br>Internal use only</div>
   </div>
 </header>
@@ -242,7 +246,6 @@ footer .qmark { width: 12px; height: 18px; }
       <input type="search" id="q" placeholder="Search apps and help" autocomplete="off" aria-label="Search the hub">
       <kbd aria-hidden="true">/</kbd>
     </label>
-    <button type="button" class="ask-open" id="askOpen">💡 Request a feature or a new app</button>
   </div>
   <div id="sections"></div>
   <footer><span class="qmark" aria-hidden="true"><svg viewBox="4 0 32 48"><path d="M20 2 34 16 20 30 6 16z" fill="#84B0D5"/><path d="M20 18 34 32 20 46 6 32z" fill="#8F568F"/><path d="M20 18 26 24 20 30 14 24z" fill="#18214E"/></svg></span>
