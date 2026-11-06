@@ -40,7 +40,33 @@ a { color: inherit; text-decoration: none; }
 .launch .go:hover { background: var(--sky-soft); }
 .launch .x { flex: none; border: 0; background: none; color: #C9D8EE; font-size: 20px; line-height: 1; cursor: pointer; padding: 2px 6px; border-radius: 6px; }
 .launch .x:hover { background: rgba(255,255,255,.12); color: #fff; }
-@media (max-width: 700px) { .launch { flex-wrap: wrap; } .launch .go { order: 3; } }
+.wheel { position: relative; margin: 0 0 18px; }
+.wheel .launch { margin: 0; animation: wheelIn .35s ease; }
+@keyframes wheelIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.wheel-nav { position: absolute; right: 56px; bottom: 8px; display: flex; gap: 6px; align-items: center; }
+.wheel-nav button { width: 8px; height: 8px; border-radius: 50%; border: 0; padding: 0; background: rgba(255,255,255,.35); cursor: pointer; }
+.wheel-nav button[aria-current=true] { background: #fff; width: 18px; border-radius: 4px; }
+.wheel-nav .arr { width: auto; height: auto; background: none; color: #C9D8EE; font-size: 14px; padding: 0 4px; border-radius: 4px; }
+.wheel-nav .arr:hover { color: #fff; }
+@media (max-width: 700px) { .launch { flex-wrap: wrap; } .launch .go { order: 3; } .wheel-nav { position: static; justify-content: center; margin-top: 6px; } .wheel-nav button { background: var(--line-strong); } .wheel-nav button[aria-current=true] { background: var(--q-navy); } }
+/* Request a feature: goes to the Requests page in Weekly Progress, where the people who manage our apps see every ask */
+.ask-open { width: auto; align-self: flex-start; justify-self: start; display: inline-flex; gap: 6px; align-items: center; margin-top: 12px; font: inherit; font-size: 13.5px; font-weight: 600; color: var(--q-navy); background: var(--surface);
+  border: 1px solid var(--line-strong); border-radius: 9px; padding: 7px 14px; cursor: pointer; }
+.ask-open:hover { border-color: var(--q-plum); color: var(--q-plum); }
+dialog.ask { border: 0; border-radius: 14px; padding: 0; width: min(520px, 94vw); box-shadow: 0 20px 60px rgba(24,33,78,.25); }
+dialog.ask::backdrop { background: rgba(24,33,78,.35); }
+.ask-h { padding: 18px 22px 10px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; gap: 10px; }
+.ask-h h3 { margin: 0; font-size: 17px; color: var(--q-navy); } .ask-h p { margin: 2px 0 0; font-size: 13px; color: var(--muted); }
+.ask-h button { border: 0; background: none; font-size: 22px; color: var(--faint); cursor: pointer; line-height: 1; }
+.ask-b { padding: 14px 22px 20px; display: flex; flex-direction: column; gap: 12px; }
+.ask-b label { display: flex; flex-direction: column; gap: 5px; font-size: 12.5px; font-weight: 600; color: var(--muted); }
+.ask-b input, .ask-b select, .ask-b textarea { font: inherit; font-size: 14px; color: var(--ink); padding: 8px 10px; border: 1px solid var(--line-strong); border-radius: 8px; background: #fff; }
+.ask-b textarea { resize: vertical; }
+.ask-b .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ask-b .hp { position: absolute; left: -9999px; }
+.ask-b .err { color: #C92A2A; font-size: 13px; min-height: 1em; }
+.ask-b .send { align-self: flex-end; font: inherit; font-weight: 650; background: var(--q-navy); color: #fff; border: 0; border-radius: 8px; padding: 9px 18px; cursor: pointer; }
+.ask-done { padding: 26px 22px; text-align: center; } .ask-done b { display: block; font-size: 17px; color: var(--q-navy); margin-bottom: 4px; }
 :focus-visible { outline: 2px solid var(--q-sky); outline-offset: 2px; border-radius: 6px; }
 h1, h2, h3 { margin: 0; line-height: 1.2; letter-spacing: -.015em; }
 p { margin: 0; }
@@ -216,12 +242,27 @@ footer .qmark { width: 12px; height: 18px; }
       <input type="search" id="q" placeholder="Search apps and help" autocomplete="off" aria-label="Search the hub">
       <kbd aria-hidden="true">/</kbd>
     </label>
+    <button type="button" class="ask-open" id="askOpen">💡 Request a feature or a new app</button>
   </div>
   <div id="sections"></div>
   <footer><span class="qmark" aria-hidden="true"><svg viewBox="4 0 32 48"><path d="M20 2 34 16 20 30 6 16z" fill="#84B0D5"/><path d="M20 18 34 32 20 46 6 32z" fill="#8F568F"/><path d="M20 18 26 24 20 30 14 24z" fill="#18214E"/></svg></span>
     © <span id="yr"></span> Quilt Software · Sales Operations · Internal use only</footer>
 </main>
 
+<dialog class="ask" id="askDlg" aria-labelledby="askTitle">
+  <div class="ask-h"><div><h3 id="askTitle">Request a feature</h3><p>It goes to the people who build and look after our apps. They'll reply to your work email.</p></div>
+    <button type="button" id="askX" aria-label="Close">×</button></div>
+  <form class="ask-b" id="askForm">
+    <div class="two"><label>Your name<input name="name" required autocomplete="name"></label>
+      <label>Work email<input name="email" type="email" required autocomplete="email" placeholder="you@quiltsoftware.com"></label></div>
+    <label>For<select name="appId" id="askApp"><option value="">A new app or idea</option></select></label>
+    <label>What should it do?<textarea name="text" rows="3" required maxlength="2000"></textarea></label>
+    <label>Why, or who it would help <span style="font-weight:400">(optional)</span><textarea name="why" rows="2" maxlength="1000"></textarea></label>
+    <label class="hp" aria-hidden="true">Website<input name="website" tabindex="-1" autocomplete="off"></label>
+    <div class="err" id="askErr"></div>
+    <button type="submit" class="send">Send request</button>
+  </form>
+</dialog>
 <script>
 // ---- the content: edit these lists to add or change links ----
 // Apps open in a new tab. Each one has its own sign-in.
@@ -345,26 +386,69 @@ addEventListener('keydown', e => {
 document.getElementById('yr').textContent = new Date().getFullYear();
 render();
 
-// ---- "New app" banner: what Weekly Progress says went live lately (apps marked "Added to the Sales Hub") ----
+// ---- "New app" wheel: what Weekly Progress says went live in the last two weeks (apps marked "Added to the Sales Hub").
+// One at a time, turning every 7 seconds (stops while the mouse is on it); × hides that one on this browser.
+const WP = 'https://internal-team-weeklyprogress.vercel.app';
 (async () => {
   const box = document.getElementById('launches');
   let seen = [];
   try { seen = JSON.parse(localStorage.getItem('hub-launch-seen') || '[]'); } catch (e) {}
   let list = [];
-  try {
-    const r = await fetch('https://internal-team-weeklyprogress.vercel.app/api/public/launches', {cache: 'no-store'});
-    list = (await r.json()).launches || [];
-  } catch (e) { return; }           // no banner if it can't be reached
+  try { list = (await (await fetch(WP + '/api/public/launches', {cache: 'no-store'})).json()).launches || []; } catch (e) { return; }
+  let i = 0, timer = null, paused = false;
+  const day = d => new Date(d + 'T12:00').toLocaleDateString(undefined, {month: 'short', day: 'numeric'});
   const draw = () => {
     const xs = list.filter(a => !seen.includes(a.id + a.liveSince));
-    const day = d => new Date(d + 'T12:00').toLocaleDateString(undefined, {month: 'short', day: 'numeric'});
-    box.innerHTML = xs.map(a => `<div class="launch" role="status"><span class="rk" aria-hidden="true">🚀</span>
-      <div class="lt"><small>New app · live ${esc(day(a.liveSince))}</small><b>${esc(a.title)}</b>${a.blurb ? `<span>${esc(a.blurb)}</span>` : ''}</div>
+    if (!xs.length) { box.innerHTML = ''; clearInterval(timer); return; }
+    i = (i + xs.length) % xs.length;
+    const a = xs[i];
+    box.innerHTML = `<div class="wheel" role="region" aria-roledescription="carousel" aria-label="New apps"><div class="launch" role="status"><span class="rk" aria-hidden="true">🚀</span>
+      <div class="lt"><small>New app · live ${esc(day(a.liveSince))}${xs.length > 1 ? ` · ${i + 1} of ${xs.length}` : ''}</small><b>${esc(a.title)}</b>${a.blurb ? `<span>${esc(a.blurb)}</span>` : ''}</div>
       ${a.link ? `<a class="go" href="${esc(a.link)}" target="_blank" rel="noopener">Open it ↗</a>` : ''}
-      <button type="button" class="x" data-k="${esc(a.id + a.liveSince)}" aria-label="Dismiss">×</button></div>`).join('');
-    box.querySelectorAll('.x').forEach(b => b.onclick = () => { seen.push(b.dataset.k); localStorage.setItem('hub-launch-seen', JSON.stringify(seen.slice(-50))); draw(); });
+      <button type="button" class="x" aria-label="Hide this announcement">×</button></div>
+      ${xs.length > 1 ? `<div class="wheel-nav"><button type="button" class="arr" data-d="-1" aria-label="Previous">‹</button>${xs.map((_, k) => `<button type="button" data-k="${k}" aria-label="Announcement ${k + 1}"${k === i ? ' aria-current="true"' : ''}></button>`).join('')}<button type="button" class="arr" data-d="1" aria-label="Next">›</button></div>` : ''}</div>`;
+    box.querySelector('.x').onclick = () => { seen.push(a.id + a.liveSince); localStorage.setItem('hub-launch-seen', JSON.stringify(seen.slice(-50))); draw(); };
+    box.querySelectorAll('[data-k]').forEach(b => b.onclick = () => { i = +b.dataset.k; draw(); });
+    box.querySelectorAll('[data-d]').forEach(b => b.onclick = () => { i += +b.dataset.d; draw(); });
+    const w = box.querySelector('.wheel');
+    w.onmouseenter = () => { paused = true; }; w.onmouseleave = () => { paused = false; };
   };
   draw();
+  timer = setInterval(() => { if (!paused && !document.hidden) { i++; draw(); } }, 7000);
+})();
+
+// ---- Request a feature (or a new app): it lands on the Requests page in Weekly Progress ----
+(() => {
+  const dlg = document.getElementById('askDlg'), form = document.getElementById('askForm'), err = document.getElementById('askErr');
+  const F = k => form.elements.namedItem(k);       // not form.name: that's the form's own name
+  let loaded = false;
+  document.getElementById('askOpen').onclick = async () => {
+    dlg.showModal();
+    if (!loaded) {
+      loaded = true;
+      try { const apps = (await (await fetch(WP + '/api/public/apps')).json()).apps || [];
+        document.getElementById('askApp').insertAdjacentHTML('beforeend', apps.map(a => `<option value="${esc(a.id)}">${esc(a.title)}</option>`).join('')); } catch (e) {}
+    }
+    try { const me = JSON.parse(localStorage.getItem('hub-ask-me') || '{}'); if (me.name) F('name').value = me.name; if (me.email) F('email').value = me.email; } catch (e) {}
+    (F('name').value ? F('text') : F('name')).focus();
+  };
+  document.getElementById('askX').onclick = () => dlg.close();
+  form.onsubmit = async e => {
+    e.preventDefault(); err.textContent = '';
+    const b = form.querySelector('.send'); b.disabled = true;
+    const body = Object.fromEntries(new FormData(form));
+    try {
+      const r = await fetch(WP + '/api/public/ask', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({...body, kind: body.appId ? 'feature' : 'feature'})});
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(j.error || 'That didn’t send. Try again.');
+      localStorage.setItem('hub-ask-me', JSON.stringify({name: body.name, email: body.email}));
+      F('text').value = F('why').value = '';
+      form.insertAdjacentHTML('beforebegin', '<div class="ask-done" id="askDone"><b>Thanks, it’s in.</b>The team will reply to your work email.</div>');
+      form.hidden = true;
+      setTimeout(() => { dlg.close(); form.hidden = false; const d = document.getElementById('askDone'); if (d) d.remove(); }, 2600);
+    } catch (x) { err.textContent = x.message; }
+    b.disabled = false;
+  };
 })();
 </script>
 </body>
