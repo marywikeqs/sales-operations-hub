@@ -231,7 +231,7 @@ footer .qmark { width: 12px; height: 18px; }
     <nav class="nav" id="nav" aria-label="Sections"></nav>
     <button type="button" class="portal-link first ask-side" id="askOpen"><svg class="ti" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.4 1 1.1 1 1.8V16h5v-.3c0-.7.4-1.4 1-1.8A6 6 0 0 0 12 3z"/></svg>Request a feature or app</button>
     <a class="portal-link" href="/portal"><svg class="ti" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg>Team Portal</a>
-    <div class="bar-foot"><b>Sales Operations</b><br>Internal use only</div>
+    <div class="bar-foot" id="barFoot"><b>Sales Operations</b><br>Internal use only</div>
   </div>
 </header>
 
@@ -256,7 +256,7 @@ footer .qmark { width: 12px; height: 18px; }
   <div class="ask-h"><div><h3 id="askTitle">Request a feature</h3><p>It goes to the people who build and look after our apps. They'll reply to your work email.</p></div>
     <button type="button" id="askX" aria-label="Close">×</button></div>
   <form class="ask-b" id="askForm">
-    <div class="two"><label>Your name<input name="name" required autocomplete="name"></label>
+    <div class="two" id="askWho"><label>Your name<input name="name" required autocomplete="name"></label>
       <label>Work email<input name="email" type="email" required autocomplete="email" placeholder="you@quiltsoftware.com"></label></div>
     <label>For<select name="appId" id="askApp"><option value="">A new app or idea</option></select></label>
     <label>What should it do?<textarea name="text" rows="3" required maxlength="2000"></textarea></label>
@@ -387,6 +387,7 @@ addEventListener('keydown', e => {
   if (e.key === 'Escape' && document.activeElement === q) { q.value = ''; query = ''; render(); }
 });
 document.getElementById('yr').textContent = new Date().getFullYear();
+if (window.HUB_USER && HUB_USER.email) document.getElementById('barFoot').innerHTML = `<b>${esc(HUB_USER.name || HUB_USER.email)}</b><br><a href="/auth/logout" style="color:#C2CCE3;text-decoration:underline">Sign out</a>`;
 render();
 
 // ---- "New app" wheel: what Weekly Progress says went live in the last two weeks (apps marked "Added to the Sales Hub").
@@ -433,6 +434,10 @@ const WP = 'https://internal-team-weeklyprogress.vercel.app';
         document.getElementById('askApp').insertAdjacentHTML('beforeend', apps.map(a => `<option value="${esc(a.id)}">${esc(a.title)}</option>`).join('')); } catch (e) {}
     }
     try { const me = JSON.parse(localStorage.getItem('hub-ask-me') || '{}'); if (me.name) F('name').value = me.name; if (me.email) F('email').value = me.email; } catch (e) {}
+    if (window.HUB_USER && HUB_USER.email) {        // signed in with Microsoft: no need to say who you are
+      F('name').value = HUB_USER.name || HUB_USER.email; F('email').value = HUB_USER.email;
+      document.getElementById('askWho').hidden = true;
+    }
     (F('name').value ? F('text') : F('name')).focus();
   };
   document.getElementById('askX').onclick = () => dlg.close();

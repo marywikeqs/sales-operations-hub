@@ -25,6 +25,18 @@
   ],
   "rewrites": [
     {
+      "source": "/",
+      "destination": "/api/sso"
+    },
+    {
+      "source": "/index.html",
+      "destination": "/api/sso"
+    },
+    {
+      "source": "/auth/:path*",
+      "destination": "/api/sso"
+    },
+    {
       "source": "/portal",
       "destination": "/api/portal"
     },
@@ -44,6 +56,10 @@
   "functions": {
     "api/portal.py": {
       "maxDuration": 10
+    },
+    "api/sso.py": {
+      "maxDuration": 10,
+      "includeFiles": "api/_hub.html"
     }
   }
 }
